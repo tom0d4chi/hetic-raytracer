@@ -1,0 +1,77 @@
+# ===================================
+# Build directories
+# ===================================
+/build/
+/out/
+/bin/
+/lib/
+/CMakeFiles/
+/CMakeCache.txt
+cmake-build-*/
+Makefile
+CMakeScripts/
+Testing/
+CTestTestfile.cmake
+install_manifest.txt
+
+# ===================================
+# OS-specific
+# ===================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ===================================
+# IDE / Editor files
+# ===================================
+.vscode/
+.idea/
+*.code-workspace
+
+# ===================================
+# Logs and temporary files
+# ===================================
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+*.orig
+
+# ===================================
+# Compiler / Debug outputs
+# ===================================
+*.obj
+*.o
+*.a
+*.lib
+*.so
+*.dll
+*.exe
+*.out
+*.pdb
+
+# ===================================
+# Raytracer specific
+# ===================================
+# Output renders, scenes, cache
+assets/outputs/
+assets/tmp/
+*.ppm
+*.png
+*.jpg
+
+# ===================================
+# Misc
+# ===================================
+compile_commands.json
