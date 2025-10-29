@@ -1,0 +1,3 @@
+/Users/thomascaen/hetic-raytracer/build/CMakeFiles/raytracer.dir
+/Users/thomascaen/hetic-raytracer/build/CMakeFiles/edit_cache.dir
+/Users/thomascaen/hetic-raytracer/build/CMakeFiles/rebuild_cache.dir
