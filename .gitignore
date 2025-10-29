@@ -1,0 +1,5 @@
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+*.log
+.DS_Store
