@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Regex for Conventional Commits
+CONVENTIONAL_REGEX="^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert)(\([a-z0-9\-]+\))?: .{1,50}"
+
+commit_message=$(cat "$1")
+
+if ! echo "$commit_message" | grep -Eq "$CONVENTIONAL_REGEX"; then
+  echo "ERROR: Commit message does not follow Conventional Commits."
+  echo "Format: type(scope?): description"
+  exit 1
+fi
