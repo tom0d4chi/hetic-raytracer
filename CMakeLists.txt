@@ -14,7 +14,6 @@ target_include_directories(hetic-raytracer PUBLIC
 
 add_subdirectory(./src/raymath)
 add_subdirectory(./src/rayimage)
-add_subdirectory(./src/math)
 add_subdirectory(./src/lodepng)
 
 target_link_libraries(hetic-raytracer PUBLIC 
@@ -31,6 +30,6 @@ target_include_directories(render_sphere PRIVATE
                            )
 
 target_link_libraries(render_sphere PRIVATE 
-                      math
+                      raymath
                       lodepng
                       )

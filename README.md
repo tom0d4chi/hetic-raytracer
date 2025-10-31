@@ -11,9 +11,9 @@ Conventions recommandées :
 - Choix de précision : typedef/alias `Real` configurable (float ou double).
 
 Organisation :
-- math/ : headers publics (API). Le projet est conçu pour pouvoir être header-only.
+- raymath/ : helpers vectoriels & géométriques (headers accessibles globalement).
 - doc/ : notes mathématiques, recommandations numériques.
 
 Notes :
-- Le module `math` ne doit dépendre d'aucun autre module du projet.
+- Le module `raymath` ne doit dépendre d'aucun autre module du projet.
 - Favoriser des fonctions inline et éviter les allocations dans le hot-path.
