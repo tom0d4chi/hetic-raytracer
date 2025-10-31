@@ -26,7 +26,7 @@ target_link_libraries(hetic-raytracer PUBLIC
 add_executable(render_sphere tools/render_sphere.cpp)
 
 target_include_directories(render_sphere PRIVATE
-                           "${PROJECT_SOURCE_DIR}/src/render/include"
+                           "${PROJECT_SOURCE_DIR}/src"
                            "${PROJECT_SOURCE_DIR}/src/lodepng"
                            )
 

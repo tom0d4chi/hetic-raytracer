@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../math/include/math/Vec3.hpp"
-#include "../../math/include/math/Ray.hpp"
-#include "../../math/include/math/Intersection.hpp"
+#include "../math/Vec3.hpp"
+#include "../math/Ray.hpp"
+#include "../math/Intersection.hpp"
 
 #include <memory>
 
