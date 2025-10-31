@@ -1,0 +1,9 @@
+/build/
+/out/
+
+CMakePresets.json
+
+# Generated render outputs
+sphere.ppm
+sphere.png
+*.png
