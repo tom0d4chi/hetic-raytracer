@@ -41,10 +41,6 @@ int main()
 
     plane.DrawPlane(image, cam_origin, width, height);
 
-    // Rendu des sphères
-    Real aspect = Real(width) / Real(height);
-    Real focal_length = 4.0f; // Distance focale (plus petite = champ de vision plus large)
-
     // Création de plusieurs sphères avec couleurs, positions et tailles variées
     vector<Sphere> spheres;
 
