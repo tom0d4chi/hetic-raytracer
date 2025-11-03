@@ -35,7 +35,7 @@ int main()
     Image image(width, height, black);
 
     // Paramètres de la caméra et du plan
-    Vec3 cam_origin(0, 1.5f, 0);
+    Vec3 cam_origin(0, 1.5f, -7);
     array<Color, 2> planeColors = {white, black};
     Plane plane(planeColors, 0.0f, 1.0f);
 
@@ -43,72 +43,101 @@ int main()
 
     // Rendu des sphères
     Real aspect = Real(width) / Real(height);
-    Real viewport_height = 2.0;
-    Real viewport_width = aspect * viewport_height;
-    Real focal_length = 1.0;
-
-    Vec3 horizontal(viewport_width, 0, 0);
-    Vec3 vertical(0, viewport_height, 0);
-    Vec3 lower_left = cam_origin - horizontal/2 - vertical/2 - Vec3(0, 0, focal_length);
+    Real focal_length = 2.0f; // Distance focale (plus petite = champ de vision plus large)
 
     // Création de plusieurs sphères avec couleurs, positions et tailles variées
     vector<Sphere> spheres;
 
-    // Rangée arrière (plus éloignée)
-    spheres.emplace_back(Vec3(-4.0, 2.5, -8.0), Real(1.2), nullptr, Vec3(0.4, 0.7, 1.0)); // bleu clair (gauche arrière)
-    spheres.emplace_back(Vec3(-1.5, 2.2, -7.0), Real(1.5), nullptr, Vec3(1.0, 0.3, 0.8)); // rose/magenta (arrière)
-    spheres.emplace_back(Vec3(2.0, 1.5, -6.5), Real(0.8), nullptr, Vec3(0.2, 1.0, 0.3)); // vert clair (arrière droite)
-    spheres.emplace_back(Vec3(4.5, 2.8, -9.0), Real(1.5), nullptr, Vec3(0.7, 0.5, 1.0)); // violet (droite arrière)
+    // Zone très avant-plan (z: 1.0 à 3.0)
+    spheres.emplace_back(Vec3(-1.0, 0.6, 1.0), Real(0.4), nullptr, Vec3(1.0, 0.3, 0.3)); // rouge
+    spheres.emplace_back(Vec3(-3.5, 0.8, 1.7), Real(0.5), nullptr, Vec3(0.7, 1.0, 0.3)); // vert-jaune
+    spheres.emplace_back(Vec3(1.8, 0.7, 2.4), Real(0.6), nullptr, Vec3(0.2, 0.6, 1.0));  // bleu moyen
+    spheres.emplace_back(Vec3(-2.0, 0.9, 3.0), Real(0.6), nullptr, Vec3(1.0, 1.0, 0.2)); // jaune
 
-    // Rangée milieu
-    spheres.emplace_back(Vec3(-3.0, 1.2, -4.5), Real(0.7), nullptr, Vec3(0.2, 0.8, 0.5)); // vert émeraude
-    spheres.emplace_back(Vec3(-0.5, 1.8, -5.0), Real(1.0), nullptr, Vec3(0.1, 1.0, 0.8)); // cyan
-    spheres.emplace_back(Vec3(1.5, 1.4, -4.0), Real(0.9), nullptr, Vec3(0.3, 0.5, 1.0)); // bleu
-    spheres.emplace_back(Vec3(3.5, 2.0, -5.5), Real(1.3), nullptr, Vec3(0.2, 1.0, 0.2)); // vert vif
-    spheres.emplace_back(Vec3(5.0, 1.6, -5.0), Real(1.0), nullptr, Vec3(1.0, 0.8, 0.3)); // orange/jaune
+    // Zone avant-plan proche (z: 3.7 à 6.0)
+    spheres.emplace_back(Vec3(2.5, 1.0, 3.7), Real(0.7), nullptr, Vec3(0.5, 1.0, 1.0));  // cyan clair
+    spheres.emplace_back(Vec3(0.0, 1.3, 4.5), Real(0.8), nullptr, Vec3(1.0, 0.2, 0.5));  // rose
+    spheres.emplace_back(Vec3(-1.5, 1.4, 5.2), Real(0.9), nullptr, Vec3(0.3, 0.5, 1.0)); // bleu
+    spheres.emplace_back(Vec3(-5.5, 1.2, 6.0), Real(0.7), nullptr, Vec3(0.0, 1.0, 1.0)); // cyan vif
 
-    // Rangée avant
-    spheres.emplace_back(Vec3(-2.5, 1.0, -2.5), Real(0.7), nullptr, Vec3(0.5, 1.0, 1.0)); // cyan clair
-    spheres.emplace_back(Vec3(0.0, 1.3, -3.0), Real(0.8), nullptr, Vec3(1.0, 0.2, 0.5)); // rose
-    spheres.emplace_back(Vec3(2.0, 0.9, -2.0), Real(0.6), nullptr, Vec3(1.0, 1.0, 0.2)); // jaune
+    // Zone milieu (z: 6.7 à 9.5)
+    spheres.emplace_back(Vec3(3.0, 1.2, 6.7), Real(0.7), nullptr, Vec3(0.2, 0.8, 0.5)); // vert émeraude
+    spheres.emplace_back(Vec3(5.0, 1.5, 7.5), Real(0.8), nullptr, Vec3(1.0, 1.0, 0.0)); // jaune vif
+    spheres.emplace_back(Vec3(0.5, 1.8, 8.3), Real(1.0), nullptr, Vec3(0.1, 1.0, 0.8)); // cyan
+    spheres.emplace_back(Vec3(6.0, 1.8, 9.1), Real(0.9), nullptr, Vec3(1.0, 0.4, 0.4)); // rouge clair
 
-    auto clampColor = [](Real value) -> float {
-        if (value < 0) {
+    // Zone milieu-arrière (z: 9.8 à 12.5)
+    spheres.emplace_back(Vec3(-3.5, 2.0, 9.8), Real(1.3), nullptr, Vec3(0.2, 1.0, 0.2));  // vert vif
+    spheres.emplace_back(Vec3(-5.0, 1.6, 10.5), Real(1.0), nullptr, Vec3(1.0, 0.8, 0.3)); // orange/jaune
+    spheres.emplace_back(Vec3(4.0, 2.0, 11.2), Real(1.0), nullptr, Vec3(0.6, 0.3, 0.8));  // violet
+    spheres.emplace_back(Vec3(-2.0, 1.5, 11.8), Real(0.8), nullptr, Vec3(0.2, 1.0, 0.3)); // vert clair
+
+    // Zone arrière (z: 13.2 à 15.5)
+    spheres.emplace_back(Vec3(1.5, 2.2, 13.2), Real(1.5), nullptr, Vec3(1.0, 0.3, 0.8));  // rose/magenta
+    spheres.emplace_back(Vec3(-6.0, 1.8, 13.8), Real(1.1), nullptr, Vec3(1.0, 0.5, 0.0)); // orange
+    spheres.emplace_back(Vec3(3.5, 2.5, 14.4), Real(1.3), nullptr, Vec3(0.3, 0.9, 0.6));  // vert menthe
+    spheres.emplace_back(Vec3(-1.0, 2.5, 15.0), Real(1.2), nullptr, Vec3(0.4, 0.7, 1.0)); // bleu clair
+    spheres.emplace_back(Vec3(0.8, 3.0, 15.5), Real(1.2), nullptr, Vec3(0.9, 0.5, 0.2));  // orange foncé
+
+    // Zone arrière lointaine (z: 16.2 à 18.0)
+    spheres.emplace_back(Vec3(-6.5, 2.8, 16.2), Real(1.4), nullptr, Vec3(1.0, 0.7, 0.8)); // rose pâle
+    spheres.emplace_back(Vec3(-4.5, 2.8, 16.8), Real(1.5), nullptr, Vec3(1.0, 0.0, 0.0)); // violet
+    spheres.emplace_back(Vec3(-0.5, 3.5, 17.4), Real(1.0), nullptr, Vec3(0.5, 0.8, 1.0)); // bleu ciel
+    spheres.emplace_back(Vec3(2.5, 3.2, 18.0), Real(1.5), nullptr, Vec3(0.4, 0.4, 1.0));  // bleu profond
+
+    // Zone très lointaine (z: 18.6 à 20.0)
+    spheres.emplace_back(Vec3(-3.0, 2.5, 18.6), Real(1.3), nullptr, Vec3(0.8, 1.0, 0.8)); // vert pâle
+    spheres.emplace_back(Vec3(0.0, 2.0, 19.3), Real(1.6), nullptr, Vec3(1.0, 0.6, 0.0));  // or
+    spheres.emplace_back(Vec3(-7.0, 2.3, 20.0), Real(0.9), nullptr, Vec3(0.8, 0.2, 0.9)); // violet foncé
+
+    auto clampColor = [](Real value) -> float
+    {
+        if (value < 0)
+        {
             return 0.0f;
         }
-        if (value > 1) {
+        if (value > 1)
+        {
             return 1.0f;
         }
         return static_cast<float>(value);
     };
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (int y = 0; y < height; ++y)
+    {
+        for (int x = 0; x < width; ++x)
+        {
             Real u = (Real(x) + 0.5) / Real(width);
             Real v = (Real(height - 1 - y) + 0.5) / Real(height);
 
-            Vec3 dir = (lower_left + horizontal * u + vertical * v) - cam_origin;
-            Vec3 dirn = dir.normalized();
-            Ray r(cam_origin, dirn);
+            // Calcul de la direction du rayon avec focal_length
+            float screenX = ((2.0f * x / width) - 1.0f) * aspect;
+            float screenY = (2.0f * y / height) - 1.0f;
+
+            Vec3 rayDirection(screenX, screenY, focal_length);
+            rayDirection = rayDirection.normalized();
+            Ray r(cam_origin, rayDirection);
 
             // Test d'intersection avec toutes les sphères et garde la plus proche
             Vec3 sphere_color(0.0, 0.0, 0.0);
             Real closest_t = numeric_limits<Real>::infinity();
-            for (const auto& s : spheres) {
+            for (const auto &s : spheres)
+            {
                 auto hit = s.intersect(r);
-                if (hit && hit->t < closest_t) {
+                if (hit && hit->t < closest_t)
+                {
                     closest_t = hit->t;
                     sphere_color = s.color();
                 }
             }
 
             // Si on a touché une sphère, on utilise sa couleur
-            if (closest_t < numeric_limits<Real>::infinity()) {
+            if (closest_t < numeric_limits<Real>::infinity())
+            {
                 Color pixelColor(
                     clampColor(sphere_color.x),
                     clampColor(sphere_color.y),
-                    clampColor(sphere_color.z)
-                );
+                    clampColor(sphere_color.z));
                 image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
             }
         }
