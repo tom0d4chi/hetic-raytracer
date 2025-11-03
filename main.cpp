@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Color.hpp"
 #include "Image.hpp"
+#include "Timer.hpp"
 
 using namespace std;
 
@@ -19,6 +20,8 @@ int main()
 
     cout << "Yellow : " << yellow << std::endl;
 
+
+    Timer liveTimer("Génération de l'image");
     // Create an image in memory, and fill it with yellow
     Image image(512, 512, yellow);
 
@@ -29,5 +32,11 @@ int main()
       }
     }
 
-    image.WriteFile("test.png");
+  
+   image.WriteFile("test.png");
+
+   
+   liveTimer.stop();
+
+    return 0;
 }
