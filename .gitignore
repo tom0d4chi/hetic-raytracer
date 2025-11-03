@@ -7,3 +7,5 @@ CMakePresets.json
 sphere.ppm
 sphere.png
 *.png
+
+.vscode/

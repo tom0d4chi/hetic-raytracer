@@ -20,7 +20,7 @@ void Timer::run() {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         const auto s = duration_cast<seconds>(steady_clock::now() - start_).count();
         std::cout << "\r" << label_ << " " << spin[i++ % 4]
-                  << "  Temps écoulé : " << s << " s" << std::flush;
+                  << "  Temps ecoule : " << s << " s" << std::flush;
     }
 }
 
@@ -35,7 +35,7 @@ void Timer::stop() {
         if (t_.joinable()) t_.join();
         using namespace std::chrono;
         const auto ms = duration_cast<milliseconds>(steady_clock::now() - start_).count();
-        std::cout << "\n" << label_ << " terminé en "
+        std::cout << "\n" << label_ << " termine en "
                   << std::fixed << std::setprecision(3) << (ms / 1000.0) << " s\n";
     }
 }
