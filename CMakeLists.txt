@@ -60,3 +60,17 @@ target_link_libraries(render_plane PRIVATE
                       rayscene
                       lodepng
                       )
+
+add_executable(render_cube tools/render_cube.cpp)
+target_include_directories(render_cube PRIVATE
+                          "${PROJECT_SOURCE_DIR}/src"
+                          "${PROJECT_SOURCE_DIR}/src/lodepng"
+                          )
+target_sources(render_cube PRIVATE
+                src/raytimer/Timer.cpp
+)
+target_link_libraries(render_cube PRIVATE
+                      rayimage
+                      rayscene
+                      lodepng
+                      )
