@@ -35,7 +35,7 @@ int main()
     Image image(width, height, black);
 
     // Paramètres de la caméra et du plan
-    Vec3 cam_origin(0, 1.5f, -7);
+    Vec3 cam_origin(0, 1.5f, -8);
     array<Color, 2> planeColors = {white, black};
     Plane plane(planeColors, 0.0f, 1.0f);
 
@@ -43,7 +43,7 @@ int main()
 
     // Rendu des sphères
     Real aspect = Real(width) / Real(height);
-    Real focal_length = 2.0f; // Distance focale (plus petite = champ de vision plus large)
+    Real focal_length = 4.0f; // Distance focale (plus petite = champ de vision plus large)
 
     // Création de plusieurs sphères avec couleurs, positions et tailles variées
     vector<Sphere> spheres;
