@@ -90,58 +90,7 @@ int main()
     spheres.emplace_back(Vec3(0.0, 2.0, 19.3), Real(1.6), nullptr, Vec3(1.0, 0.6, 0.0));  // or
     spheres.emplace_back(Vec3(-7.0, 2.3, 20.0), Real(0.9), nullptr, Vec3(0.8, 0.2, 0.9)); // violet foncé
 
-    auto clampColor = [](Real value) -> float
-    {
-        if (value < 0)
-        {
-            return 0.0f;
-        }
-        if (value > 1)
-        {
-            return 1.0f;
-        }
-        return static_cast<float>(value);
-    };
-
-    for (int y = 0; y < height; ++y)
-    {
-        for (int x = 0; x < width; ++x)
-        {
-            Real u = (Real(x) + 0.5) / Real(width);
-            Real v = (Real(height - 1 - y) + 0.5) / Real(height);
-
-            // Calcul de la direction du rayon avec focal_length
-            float screenX = ((2.0f * x / width) - 1.0f) * aspect;
-            float screenY = (2.0f * y / height) - 1.0f;
-
-            Vec3 rayDirection(screenX, screenY, focal_length);
-            rayDirection = rayDirection.normalized();
-            Ray r(cam_origin, rayDirection);
-
-            // Test d'intersection avec toutes les sphères et garde la plus proche
-            Vec3 sphere_color(0.0, 0.0, 0.0);
-            Real closest_t = numeric_limits<Real>::infinity();
-            for (const auto &s : spheres)
-            {
-                auto hit = s.intersect(r);
-                if (hit && hit->t < closest_t)
-                {
-                    closest_t = hit->t;
-                    sphere_color = s.color();
-                }
-            }
-
-            // Si on a touché une sphère, on utilise sa couleur
-            if (closest_t < numeric_limits<Real>::infinity())
-            {
-                Color pixelColor(
-                    clampColor(sphere_color.x),
-                    clampColor(sphere_color.y),
-                    clampColor(sphere_color.z));
-                image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
-            }
-        }
-    }
+    Sphere::DrawSphere(image, cam_origin, width, height, spheres);
 
     image.WriteFile("test.png");
 
