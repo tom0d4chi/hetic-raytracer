@@ -5,10 +5,10 @@
 #include <limits>
 #include <vector>
 
-#include "math/Vec3.hpp"
-#include "math/Ray.hpp"
-#include "math/Vec2.hpp"
-#include "math/Intersection.hpp"
+#include "raymath/Vec3.hpp"
+#include "raymath/Ray.hpp"
+#include "raymath/Vec2.hpp"
+#include "raymath/Intersection.hpp"
 #include "render/Sphere.hpp"
 #include "lodepng.h"
 

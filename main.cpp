@@ -1,15 +1,21 @@
 #include <iostream>
+#include <cmath>
 #include "Color.hpp"
 #include "Image.hpp"
 #include "Timer.hpp"
+#include "Ray.hpp"
+#include "Plane.hpp"
+
 
 using namespace std;
+using namespace math;
 
 
 int main()
 {    
     Color red(1, 0, 0);
     Color green(0, 1, 0);
+    Color white(1, 1, 1);
     Color black;
 
     cout << "Red : " << red << std::endl;
@@ -21,16 +27,21 @@ int main()
     cout << "Yellow : " << yellow << std::endl;
 
 
+
     Timer liveTimer("Génération de l'image");
     // Create an image in memory, and fill it with yellow
-    Image image(512, 512, yellow);
 
-    // Make a red square on the top left of the image
-    for (int y = 0; y < 100; y++) {
-      for (int x = 0; x < 100; x++) {
-        image.SetPixel(x, y, Color(1, 0, 0));
-      }
-    }
+    int width = 1920;
+    int height = 1080;
+    Image image(width, height, black);
+
+
+    // Paramètres de la caméra et du plan
+    Vec3 cam_origin(0, 1.5f, 0);
+    array<Color, 2> planeColors = {white, black};
+    Plane plane(planeColors, 0.0f, 1.0f);
+
+    plane.DrawPlane(image, cam_origin, width, height);
 
   
    image.WriteFile("test.png");

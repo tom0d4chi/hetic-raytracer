@@ -11,9 +11,16 @@ Conventions recommandées :
 - Choix de précision : typedef/alias `Real` configurable (float ou double).
 
 Organisation :
-- include/math/ : headers publics (API). Le projet est conçu pour pouvoir être header-only.
+- raymath/ : helpers vectoriels & géométriques (headers accessibles globalement).
 - doc/ : notes mathématiques, recommandations numériques.
 
 Notes :
-- Le module `math` ne doit dépendre d'aucun autre module du projet.
+- Le module `raymath` ne doit dépendre d'aucun autre module du projet.
 - Favoriser des fonctions inline et éviter les allocations dans le hot-path.
+
+
+# Contributing
+
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification for commit messages to ensure consistent and meaningful versioning.
+
+A Git hook has been set up to prevent commits that don’t follow the convention. To use it, copy the `scripts/commit-msg` file to `.git/hooks`. After doing so, you should be met with an error message if your commit doesn't follow the convention.

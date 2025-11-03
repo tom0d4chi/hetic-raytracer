@@ -10,18 +10,29 @@ add_executable(hetic-raytracer
 )
 
 target_include_directories(hetic-raytracer PUBLIC
-    "${PROJECT_BINARY_DIR}"
-    "${PROJECT_SOURCE_DIR}/src/raymath"
-    "${PROJECT_SOURCE_DIR}/src/rayimage"
-    "${PROJECT_SOURCE_DIR}/src/raytimer"
-)
+                           "${PROJECT_BINARY_DIR}"
+                           "${PROJECT_SOURCE_DIR}/src/raymath"
+                           "${PROJECT_SOURCE_DIR}/src/rayimage"
+                           "${PROJECT_SOURCE_DIR}/src/rayscene"
+                           "${PROJECT_SOURCE_DIR}/src/raytimer"
+                           )
+>>>>>>> ab11005ebc84c248df24f371ed3a3afe0f7744b7
 
 add_subdirectory(./src/raymath)
 add_subdirectory(./src/rayimage)
-add_subdirectory(./src/math)
+add_subdirectory(./src/rayscene)
 add_subdirectory(./src/lodepng)
 
+
 find_package(Threads REQUIRED)
+
+target_link_libraries(hetic-raytracer PUBLIC 
+                      raymath
+                      rayimage
+                      rayscene
+                      lodepng
+                      )
+
 
 target_link_libraries(hetic-raytracer PUBLIC
     raymath
@@ -33,10 +44,13 @@ target_link_libraries(hetic-raytracer PUBLIC
 
 add_executable(render_sphere tools/render_sphere.cpp)
 target_include_directories(render_sphere PRIVATE
-    "${PROJECT_SOURCE_DIR}/src/render/include"
-    "${PROJECT_SOURCE_DIR}/src/lodepng"
-)
-target_link_libraries(render_sphere PRIVATE
-    math
-    lodepng
-)
+
+                           "${PROJECT_SOURCE_DIR}/src"
+                           "${PROJECT_SOURCE_DIR}/src/lodepng"
+                           )
+
+target_link_libraries(render_sphere PRIVATE 
+                      raymath
+                      lodepng
+                      )
+
