@@ -6,13 +6,11 @@
 #include "Ray.hpp"
 #include "Plane.hpp"
 
-
 using namespace std;
 using namespace math;
 
-
 int main()
-{    
+{
     Color red(1, 0, 0);
     Color green(0, 1, 0);
     Color white(1, 1, 1);
@@ -26,15 +24,11 @@ int main()
 
     cout << "Yellow : " << yellow << std::endl;
 
-
-
-    Timer liveTimer("Génération de l'image");
-    // Create an image in memory, and fill it with yellow
+    Timer liveTimer("Generation de l'image");
 
     int width = 1920;
     int height = 1080;
     Image image(width, height, black);
-
 
     // Paramètres de la caméra et du plan
     Vec3 cam_origin(0, 1.5f, 0);
@@ -43,11 +37,9 @@ int main()
 
     plane.DrawPlane(image, cam_origin, width, height);
 
-  
-   image.WriteFile("test.png");
+    image.WriteFile("test.png");
 
-   
-   liveTimer.stop();
+    liveTimer.stop();
 
     return 0;
 }
