@@ -102,23 +102,28 @@ void Sphere::DrawSphere(Image& image,
             rayDirection = rayDirection.normalized();
             const Ray ray(camOrigin, rayDirection);
 
-            Vec3 color(0.0, 0.0, 0.0);
             Real closest_t = std::numeric_limits<Real>::infinity();
+            Vec3 color(0.0, 0.0, 0.0);
+            bool hitSphere = false;
+
             for (const auto& sphere : spheres) {
                 const auto hit = sphere.intersect(ray);
                 if (hit && hit->t < closest_t) {
                     closest_t = hit->t;
                     color = sphere.color();
+                    hitSphere = true;
                 }
             }
 
-            const Color pixelColor(
-                clampColor(color.x),
-                clampColor(color.y),
-                clampColor(color.z)
-            );
+            if (hitSphere) {
+                const Color pixelColor(
+                    clampColor(color.x),
+                    clampColor(color.y),
+                    clampColor(color.z)
+                );
 
-            image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
+                image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
+            }
         }
     }
 }
