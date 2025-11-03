@@ -10,15 +10,18 @@ target_include_directories(hetic-raytracer PUBLIC
                            "${PROJECT_BINARY_DIR}"
                            "${PROJECT_SOURCE_DIR}/src/raymath"
                            "${PROJECT_SOURCE_DIR}/src/rayimage"
+                           "${PROJECT_SOURCE_DIR}/src/rayscene"
                            )
 
 add_subdirectory(./src/raymath)
 add_subdirectory(./src/rayimage)
+add_subdirectory(./src/rayscene)
 add_subdirectory(./src/lodepng)
 
 target_link_libraries(hetic-raytracer PUBLIC 
                       raymath
                       rayimage
+                      rayscene
                       lodepng
                       )
 
