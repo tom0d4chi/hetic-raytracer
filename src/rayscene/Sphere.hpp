@@ -6,6 +6,9 @@
 
 #include <memory>
 #include <optional>
+#include <vector>
+
+class Image;
 
 namespace rayscene {
 
@@ -21,6 +24,11 @@ public:
     const math::Vec3& color() const noexcept;
 
     std::optional<math::HitInfo> intersect(const math::Ray& ray) const noexcept;
+    static void DrawSphere(Image& image,
+                           const math::Vec3& camOrigin,
+                           int width,
+                           int height,
+                           const std::vector<Sphere>& spheres);
 
 private:
     math::Vec3 m_center;
