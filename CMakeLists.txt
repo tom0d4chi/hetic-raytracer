@@ -37,9 +37,26 @@ target_include_directories(render_sphere PRIVATE
                            "${PROJECT_SOURCE_DIR}/src"
                            "${PROJECT_SOURCE_DIR}/src/lodepng"
                            )
+target_sources(render_sphere PRIVATE
+                src/raytimer/Timer.cpp
+)
 
 target_link_libraries(render_sphere PRIVATE 
-                      raymath
+                      rayimage
+                      rayscene
                       lodepng
                       )
 
+add_executable(render_plane tools/render_plane.cpp)
+target_include_directories(render_plane PRIVATE
+                           "${PROJECT_SOURCE_DIR}/src"
+                           )
+target_sources(render_plane PRIVATE
+                src/raytimer/Timer.cpp
+)
+
+target_link_libraries(render_plane PRIVATE
+                      rayimage
+                      rayscene
+                      lodepng
+                      )
