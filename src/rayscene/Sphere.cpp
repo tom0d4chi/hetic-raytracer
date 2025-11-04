@@ -1,13 +1,18 @@
 #include "Sphere.hpp"
+#include "../rayimage/Image.hpp"
+#include "../raymath/Color.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace rayscene {
 
 using math::HitInfo;
 using math::Ray;
 using math::Vec3;
+using math::Real;
+using ::Color;
 
 Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat) noexcept
     : m_center(center)
@@ -60,6 +65,67 @@ std::optional<HitInfo> Sphere::intersect(const Ray& ray) const noexcept {
     info.uv.v = theta / math::PI;
 
     return info;
+}
+
+void Sphere::DrawSphere(Image& image,
+                        const Vec3& camOrigin,
+                        int width,
+                        int height,
+                        const std::vector<Sphere>& spheres) {
+    if (width <= 0 || height <= 0) {
+        return;
+    }
+
+    const Real aspect = Real(width) / Real(height);
+    const Real focal_length = 4.0;
+
+    auto clampColor = [](Real value) -> float {
+        if (value < 0) {
+            return 0.0f;
+        }
+        if (value > 1) {
+            return 1.0f;
+        }
+        return static_cast<float>(value);
+    };
+
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            const Real u = (Real(x) + Real(0.5)) / Real(width);
+            const Real v = (Real(height - 1 - y) + Real(0.5)) / Real(height);
+
+            // Calcul de la direction du rayon avec focal_length
+            const Real screenX = ((Real(2.0) * x / width) - Real(1.0)) * aspect;
+            const Real screenY = (Real(2.0) * y / height) - Real(1.0);
+
+            Vec3 rayDirection(screenX, screenY, focal_length);
+            rayDirection = rayDirection.normalized();
+            const Ray ray(camOrigin, rayDirection);
+
+            Real closest_t = std::numeric_limits<Real>::infinity();
+            Vec3 color(0.0, 0.0, 0.0);
+            bool hitSphere = false;
+
+            for (const auto& sphere : spheres) {
+                const auto hit = sphere.intersect(ray);
+                if (hit && hit->t < closest_t) {
+                    closest_t = hit->t;
+                    color = sphere.color();
+                    hitSphere = true;
+                }
+            }
+
+            if (hitSphere) {
+                const Color pixelColor(
+                    clampColor(color.x),
+                    clampColor(color.y),
+                    clampColor(color.z)
+                );
+
+                image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
+            }
+        }
+    }
 }
 
 } // namespace rayscene
