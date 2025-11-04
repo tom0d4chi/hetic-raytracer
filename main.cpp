@@ -8,6 +8,7 @@
 #include "Ray.hpp"
 #include "Plane.hpp"
 #include "Sphere.hpp"
+#include "Light.hpp"
 
 using namespace std;
 using namespace math;
@@ -33,6 +34,10 @@ int main()
     int width = 1920;
     int height = 1080;
     Image image(width, height, black);
+
+    Light light(Vec3(0, 3.0f, -8));
+
+    Vec3 lightPos = light.getPosition();
 
     // Paramètres de la caméra et du plan
     Vec3 cam_origin(0, 1.5f, -8);
