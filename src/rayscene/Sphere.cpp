@@ -77,13 +77,7 @@ void Sphere::DrawSphere(Image& image,
     }
 
     const Real aspect = Real(width) / Real(height);
-    const Real viewport_height = 2.0;
-    const Real viewport_width = aspect * viewport_height;
-    const Real focal_length = 3.0;
-
-    const Vec3 horizontal(viewport_width, 0, 0);
-    const Vec3 vertical(0, viewport_height, 0);
-    const Vec3 lower_left = camOrigin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focal_length);
+    const Real focal_length = 4.0;
 
     auto clampColor = [](Real value) -> float {
         if (value < 0) {
@@ -100,27 +94,36 @@ void Sphere::DrawSphere(Image& image,
             const Real u = (Real(x) + Real(0.5)) / Real(width);
             const Real v = (Real(height - 1 - y) + Real(0.5)) / Real(height);
 
-            const Vec3 dir = (lower_left + horizontal * u + vertical * v) - camOrigin;
-            const Vec3 dirn = dir.normalized();
-            const Ray ray(camOrigin, dirn);
+            // Calcul de la direction du rayon avec focal_length
+            const Real screenX = ((Real(2.0) * x / width) - Real(1.0)) * aspect;
+            const Real screenY = (Real(2.0) * y / height) - Real(1.0);
 
-            Vec3 color(0.0, 0.0, 0.0);
+            Vec3 rayDirection(screenX, screenY, focal_length);
+            rayDirection = rayDirection.normalized();
+            const Ray ray(camOrigin, rayDirection);
+
             Real closest_t = std::numeric_limits<Real>::infinity();
+            Vec3 color(0.0, 0.0, 0.0);
+            bool hitSphere = false;
+
             for (const auto& sphere : spheres) {
                 const auto hit = sphere.intersect(ray);
                 if (hit && hit->t < closest_t) {
                     closest_t = hit->t;
                     color = sphere.color();
+                    hitSphere = true;
                 }
             }
 
-            const Color pixelColor(
-                clampColor(color.x),
-                clampColor(color.y),
-                clampColor(color.z)
-            );
+            if (hitSphere) {
+                const Color pixelColor(
+                    clampColor(color.x),
+                    clampColor(color.y),
+                    clampColor(color.z)
+                );
 
-            image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
+                image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
+            }
         }
     }
 }
