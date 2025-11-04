@@ -2,19 +2,92 @@
 #include <cmath>
 #include <vector>
 #include <limits>
+#include <array>
+#include <string>
 #include "Color.hpp"
 #include "Image.hpp"
 #include "Timer.hpp"
 #include "Ray.hpp"
 #include "Plane.hpp"
 #include "Sphere.hpp"
+#include "SceneLoader.hpp"
 
 using namespace std;
 using namespace math;
 using namespace rayscene;
 
-int main()
+int main(int argc, char* argv[])
 {
+    const std::string sceneFile = (argc > 1) ? argv[1] : "src/rayscene/scene.json";
+    SceneConfig sceneConfig = LoadSceneFromJson(sceneFile);
+
+    std::cout << "Loaded scene: " << sceneFile
+              << " (" << sceneConfig.width << "x" << sceneConfig.height << ")\n";
+
+    Timer liveTimer(sceneConfig.timerLabel);
+
+    Image image(static_cast<unsigned>(sceneConfig.width),
+                static_cast<unsigned>(sceneConfig.height),
+                sceneConfig.background);
+
+    const Vec3 camOrigin = sceneConfig.camera.origin;
+    const Vec3 camLookAt = sceneConfig.camera.lookAt;
+    const Vec3 camUp = sceneConfig.camera.up;
+    const Real aspect = Real(sceneConfig.width) / Real(sceneConfig.height);
+    const Real theta = sceneConfig.camera.verticalFov * math::DEG_TO_RAD;
+    const Real halfHeight = std::tan(theta / 2.0);
+    const Real viewportHeight = 2.0 * halfHeight;
+    const Real viewportWidth = aspect * viewportHeight;
+
+    const Vec3 w = (camOrigin - camLookAt).normalized();
+    const Vec3 u = camUp.cross(w).normalized();
+    const Vec3 v = w.cross(u);
+
+    const Real focus = sceneConfig.camera.focusDistance;
+    const Vec3 horizontal = focus * viewportWidth * u;
+    const Vec3 vertical = focus * viewportHeight * v;
+    const Vec3 lowerLeft = camOrigin - horizontal / 2.0 - vertical / 2.0 - focus * w;
+
+    if (sceneConfig.plane) {
+        const PlaneConfig& planeCfg = *sceneConfig.plane;
+        std::array<Color, 2> planeColors = {
+            planeCfg.primaryColor,
+            planeCfg.secondaryColor
+        };
+        Plane plane(planeColors, planeCfg.posY, planeCfg.tileSize);
+        plane.DrawPlane(image,
+                        camOrigin,
+                        lowerLeft,
+                        horizontal,
+                        vertical,
+                        sceneConfig.width,
+                        sceneConfig.height);
+    }
+
+    std::vector<Sphere> spheres;
+    spheres.reserve(sceneConfig.spheres.size());
+    for (const auto& sphereCfg : sceneConfig.spheres) {
+        spheres.emplace_back(sphereCfg.center,
+                             sphereCfg.radius,
+                             nullptr,
+                             sphereCfg.color);
+    }
+
+    if (!spheres.empty()) {
+        Sphere::DrawSphere(image,
+                           camOrigin,
+                           lowerLeft,
+                           horizontal,
+                           vertical,
+                           sceneConfig.width,
+                           sceneConfig.height,
+                           spheres);
+    }
+
+    image.WriteFile(sceneConfig.outputPath.c_str());
+    liveTimer.stop();
+
+    /*
     Color red(1, 0, 0);
     Color green(0, 1, 0);
     Color white(1, 1, 1);
@@ -117,6 +190,7 @@ int main()
     image.WriteFile("test.png");
 
     liveTimer.stop();
+    */
 
     return 0;
 }

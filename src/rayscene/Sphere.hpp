@@ -26,6 +26,14 @@ public:
     std::optional<math::HitInfo> intersect(const math::Ray& ray) const noexcept;
     static void DrawSphere(Image& image,
                            const math::Vec3& camOrigin,
+                           const math::Vec3& lowerLeft,
+                           const math::Vec3& horizontal,
+                           const math::Vec3& vertical,
+                           int width,
+                           int height,
+                           const std::vector<Sphere>& spheres);
+    static void DrawSphere(Image& image,
+                           const math::Vec3& camOrigin,
                            int width,
                            int height,
                            const std::vector<Sphere>& spheres);

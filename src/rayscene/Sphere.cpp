@@ -69,21 +69,15 @@ std::optional<HitInfo> Sphere::intersect(const Ray& ray) const noexcept {
 
 void Sphere::DrawSphere(Image& image,
                         const Vec3& camOrigin,
+                        const Vec3& lower_left,
+                        const Vec3& horizontal,
+                        const Vec3& vertical,
                         int width,
                         int height,
                         const std::vector<Sphere>& spheres) {
     if (width <= 0 || height <= 0) {
         return;
     }
-
-    const Real aspect = Real(width) / Real(height);
-    const Real viewport_height = 2.0;
-    const Real viewport_width = aspect * viewport_height;
-    const Real focal_length = 3.0;
-
-    const Vec3 horizontal(viewport_width, 0, 0);
-    const Vec3 vertical(0, viewport_height, 0);
-    const Vec3 lower_left = camOrigin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focal_length);
 
     auto clampColor = [](Real value) -> float {
         if (value < 0) {
@@ -123,6 +117,23 @@ void Sphere::DrawSphere(Image& image,
             image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
         }
     }
+}
+
+void Sphere::DrawSphere(Image& image,
+                        const Vec3& camOrigin,
+                        int width,
+                        int height,
+                        const std::vector<Sphere>& spheres) {
+    const Real aspect = Real(width) / Real(height);
+    const Real viewport_height = 2.0;
+    const Real viewport_width = aspect * viewport_height;
+    const Real focal_length = 3.0;
+
+    const Vec3 horizontal(viewport_width, 0, 0);
+    const Vec3 vertical(0, viewport_height, 0);
+    const Vec3 lower_left = camOrigin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focal_length);
+
+    DrawSphere(image, camOrigin, lower_left, horizontal, vertical, width, height, spheres);
 }
 
 } // namespace rayscene
