@@ -9,6 +9,9 @@
 using namespace math;
 
 float DiffuseShader::Shade(math::HitInfo hitInfo, Light light, const std::vector<rayscene::Sphere>& spheres) {
+    // TODO make ambientFactor a global variable
+    float ambientFactor = 0.3f;
+
     Vec3 normal = hitInfo.normal.normalize();
 
     Vec3 lightPos = light.getPosition();
@@ -20,7 +23,7 @@ float DiffuseShader::Shade(math::HitInfo hitInfo, Light light, const std::vector
     for (const auto& sphere : spheres) {
         const auto hit = sphere.intersect(shadowRay);
         if (hit) {
-            return 0.0f;
+            return ambientFactor;
         }
     }
 
@@ -28,5 +31,5 @@ float DiffuseShader::Shade(math::HitInfo hitInfo, Light light, const std::vector
 
     float diffuse = dotProduct > 0.0f ? dotProduct : 0.0f;
 
-    return diffuse;
+    return ambientFactor + diffuse;
 }
