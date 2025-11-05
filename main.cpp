@@ -35,7 +35,7 @@ int main()
     int height = 1080;
     Image image(width, height, black);
 
-    Light light(Vec3(0, 3.0f, -8));
+    Light light(Vec3(-5.0, 1.5, 5.0));
 
     Vec3 lightPos = light.getPosition();
 
@@ -91,7 +91,7 @@ int main()
     spheres.emplace_back(Vec3(0.0, 2.0, 19.3), Real(1.6), nullptr, Vec3(1.0, 0.6, 0.0));  // or
     spheres.emplace_back(Vec3(-7.0, 2.3, 20.0), Real(0.9), nullptr, Vec3(0.8, 0.2, 0.9)); // violet foncé
 
-    Sphere::DrawSphere(image, cam_origin, width, height, spheres);
+    Sphere::DrawSphere(image, cam_origin, width, height, spheres, light);
 
     image.WriteFile("test.png");
 
