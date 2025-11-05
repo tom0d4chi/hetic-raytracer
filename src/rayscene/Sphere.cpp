@@ -16,22 +16,24 @@ using math::Vec3;
 using math::Real;
 using ::Color;
 
-Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const math::Real reflectFactor) noexcept
+Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const math::Real reflectFactor, int specularPower) noexcept
     : m_center(center)
     , m_radius(radius)
     , m_radius2(radius * radius)
     , m_material(std::move(mat))
     , m_color(Vec3(0, 1, 0)) // default green
     , m_reflectFactor(reflectFactor)
+    , m_specularPower(specularPower)
 {}
 
-Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const Vec3& color, const math::Real reflectFactor) noexcept
+Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const Vec3& color, const math::Real reflectFactor, int specularPower) noexcept
     : m_center(center)
     , m_radius(radius)
     , m_radius2(radius * radius)
     , m_material(std::move(mat))
     , m_color(color)
     , m_reflectFactor(reflectFactor)
+    , m_specularPower(specularPower)
 {}
 
 const Vec3& Sphere::center() const noexcept {
@@ -48,6 +50,10 @@ const Vec3& Sphere::color() const noexcept {
 
 math::Real Sphere::reflectFactor() const noexcept {
     return m_reflectFactor;
+}
+
+int Sphere::specularPower() const noexcept {
+    return m_specularPower;
 }
 
 std::optional<HitInfo> Sphere::intersect(const Ray& ray) const noexcept {
@@ -115,6 +121,7 @@ void Sphere::DrawSphere(Image& image,
             Vec3 color(0.0, 0.0, 0.0);
             bool hitSphere = false;
             std::optional<HitInfo> closestHit;
+            int specularPowerToUse = 0;
 
             for (const auto& sphere : spheres) {
                 const auto hit = sphere.intersect(ray);
@@ -123,12 +130,13 @@ void Sphere::DrawSphere(Image& image,
                     color = sphere.color();
                     closestHit = hit;
                     hitSphere = true;
+                    specularPowerToUse = sphere.specularPower();
                 }
             }
 
             if (hitSphere && closestHit) {
                 DiffuseShader shader;
-                float intensity = shader.Shade(*closestHit, light, spheres);
+                float intensity = shader.Shade(*closestHit, light, spheres, camOrigin, specularPowerToUse);
                 Vec3 baseColor = color * intensity;
 
                 Vec3 reflectDir = ray.direction().reflect(closestHit->normal);

@@ -12,5 +12,5 @@ class DiffuseShader {
     private:
 
     public:
-        float Shade(math::HitInfo hitInfo, Light light, const std::vector<rayscene::Sphere>& spheres);
+        float Shade(math::HitInfo hitInfo, Light light, const std::vector<rayscene::Sphere>& spheres, Vec3 camera, int specularPower);
 };
