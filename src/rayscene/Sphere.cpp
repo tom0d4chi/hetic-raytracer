@@ -16,20 +16,22 @@ using math::Vec3;
 using math::Real;
 using ::Color;
 
-Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat) noexcept
+Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const math::Real reflectFactor) noexcept
     : m_center(center)
     , m_radius(radius)
     , m_radius2(radius * radius)
     , m_material(std::move(mat))
     , m_color(Vec3(0, 1, 0)) // default green
+    , m_reflectFactor(reflectFactor)
 {}
 
-Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const Vec3& color) noexcept
+Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const Vec3& color, const math::Real reflectFactor) noexcept
     : m_center(center)
     , m_radius(radius)
     , m_radius2(radius * radius)
     , m_material(std::move(mat))
     , m_color(color)
+    , m_reflectFactor(reflectFactor)
 {}
 
 const Vec3& Sphere::center() const noexcept {
@@ -42,6 +44,10 @@ math::Real Sphere::radius() const noexcept {
 
 const Vec3& Sphere::color() const noexcept {
     return m_color;
+}
+
+math::Real Sphere::reflectFactor() const noexcept {
+    return m_reflectFactor;
 }
 
 std::optional<HitInfo> Sphere::intersect(const Ray& ray) const noexcept {
@@ -123,11 +129,24 @@ void Sphere::DrawSphere(Image& image,
             if (hitSphere && closestHit) {
                 DiffuseShader shader;
                 float intensity = shader.Shade(*closestHit, light, spheres);
+                Vec3 baseColor = color * intensity;
+
+                Vec3 reflectDir = ray.direction().reflect(closestHit->normal);
+                Ray reflectRay(closestHit->point, reflectDir);
+                Real reflect_closest_t = std::numeric_limits<Real>::infinity();
+
+                for (const auto& sphere : spheres) {
+                    const auto hit = sphere.intersect(reflectRay);
+                    if (hit && hit->t < reflect_closest_t) {
+                        reflect_closest_t = hit->t;
+                        baseColor = baseColor + (sphere.color() * sphere.reflectFactor() * intensity);
+                    }
+                }
 
                 const Color pixelColor(
-                    clampColor(color.x) * intensity,
-                    clampColor(color.y) * intensity,
-                    clampColor(color.z) * intensity
+                    clampColor(baseColor.x),
+                    clampColor(baseColor.y),
+                    clampColor(baseColor.z)
                 );
 
                 image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
