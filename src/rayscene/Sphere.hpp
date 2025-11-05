@@ -17,8 +17,8 @@ struct Material; // placeholder for future extensions
 
 class Sphere {
 public:
-    Sphere(const math::Vec3& center, math::Real radius, std::shared_ptr<Material> mat = nullptr, const math::Real reflectFactor = 0.0) noexcept;
-    Sphere(const math::Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const math::Vec3& color, const math::Real reflectFactor) noexcept;
+    Sphere(const math::Vec3& center, math::Real radius, std::shared_ptr<Material> mat = nullptr, const math::Real reflectFactor = 0.0, int specularPower = 0) noexcept;
+    Sphere(const math::Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const math::Vec3& color, const math::Real reflectFactor, int specularPower = 0) noexcept;
 
     const math::Vec3& center() const noexcept;
     math::Real radius() const noexcept;
@@ -34,6 +34,8 @@ public:
 
     math::Real reflectFactor() const noexcept;
 
+    int specularPower() const noexcept;
+
 private:
     math::Vec3 m_center;
     math::Real m_radius;
@@ -41,6 +43,7 @@ private:
     std::shared_ptr<Material> m_material;
     math::Vec3 m_color;
     math::Real m_reflectFactor;
+    int m_specularPower;
 };
 
 } // namespace rayscene
