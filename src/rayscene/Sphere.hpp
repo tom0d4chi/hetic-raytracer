@@ -3,6 +3,7 @@
 #include "../raymath/Vec3.hpp"
 #include "../raymath/Ray.hpp"
 #include "../raymath/Intersection.hpp"
+#include "Light.hpp"
 
 #include <memory>
 #include <optional>
@@ -28,7 +29,8 @@ public:
                            const math::Vec3& camOrigin,
                            int width,
                            int height,
-                           const std::vector<Sphere>& spheres);
+                           const std::vector<Sphere>& spheres,
+                           Light light);
 
 private:
     math::Vec3 m_center;

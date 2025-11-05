@@ -1,6 +1,8 @@
 #include "Sphere.hpp"
 #include "../rayimage/Image.hpp"
 #include "../raymath/Color.hpp"
+#include "Light.hpp"
+#include "../rayshader/DiffuseShader.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -71,7 +73,8 @@ void Sphere::DrawSphere(Image& image,
                         const Vec3& camOrigin,
                         int width,
                         int height,
-                        const std::vector<Sphere>& spheres) {
+                        const std::vector<Sphere>& spheres,
+                        Light light) {
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -105,21 +108,26 @@ void Sphere::DrawSphere(Image& image,
             Real closest_t = std::numeric_limits<Real>::infinity();
             Vec3 color(0.0, 0.0, 0.0);
             bool hitSphere = false;
+            std::optional<HitInfo> closestHit;
 
             for (const auto& sphere : spheres) {
                 const auto hit = sphere.intersect(ray);
                 if (hit && hit->t < closest_t) {
                     closest_t = hit->t;
                     color = sphere.color();
+                    closestHit = hit;
                     hitSphere = true;
                 }
             }
 
-            if (hitSphere) {
+            if (hitSphere && closestHit) {
+                DiffuseShader shader;
+                float intensity = shader.Shade(*closestHit, light, spheres);
+
                 const Color pixelColor(
-                    clampColor(color.x),
-                    clampColor(color.y),
-                    clampColor(color.z)
+                    clampColor(color.x) * intensity,
+                    clampColor(color.y) * intensity,
+                    clampColor(color.z) * intensity
                 );
 
                 image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);

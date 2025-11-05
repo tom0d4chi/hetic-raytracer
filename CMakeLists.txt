@@ -12,12 +12,14 @@ target_include_directories(hetic-raytracer PUBLIC
                            "${PROJECT_SOURCE_DIR}/src/rayimage"
                            "${PROJECT_SOURCE_DIR}/src/rayscene"
                            "${PROJECT_SOURCE_DIR}/src/raytimer"
+                           "${PROJECT_SOURCE_DIR}/src/rayshader"
                            )
 
 add_subdirectory(./src/raymath)
 add_subdirectory(./src/rayimage)
 add_subdirectory(./src/rayscene)
 add_subdirectory(./src/raytimer)
+add_subdirectory(./src/rayshader)
 add_subdirectory(./src/lodepng)
 
 
@@ -28,23 +30,9 @@ target_link_libraries(hetic-raytracer PUBLIC
                       rayimage
                       rayscene
                       raytimer
+                      rayshader
                       lodepng
                       Threads::Threads
-                      )
-
-add_executable(render_sphere tools/render_sphere.cpp)
-target_include_directories(render_sphere PRIVATE
-                           "${PROJECT_SOURCE_DIR}/src"
-                           "${PROJECT_SOURCE_DIR}/src/lodepng"
-                           )
-target_sources(render_sphere PRIVATE
-                src/raytimer/Timer.cpp
-)
-
-target_link_libraries(render_sphere PRIVATE 
-                      rayimage
-                      rayscene
-                      lodepng
                       )
 
 add_executable(render_plane tools/render_plane.cpp)
