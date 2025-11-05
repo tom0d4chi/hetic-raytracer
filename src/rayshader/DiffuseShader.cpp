@@ -32,14 +32,17 @@ float DiffuseShader::Shade(math::HitInfo hitInfo, Light light, const std::vector
     float diffuse = dotProduct > 0.0f ? dotProduct : 0.0f;
 
     // calcul de specular
+    float specular = 0.0f;
 
-    Vec3 cameraDir = Vec3(camera - hitInfo.point).normalize();
+    if (specularPower > 0) {
+        Vec3 cameraDir = Vec3(camera - hitInfo.point).normalize();
 
-    Vec3 reflected = (2 * (lightDir.x * normal.x + lightDir.y * normal.y + lightDir.z * normal.z) * normal - lightDir);
+        Vec3 reflected = (2 * (lightDir.x * normal.x + lightDir.y * normal.y + lightDir.z * normal.z) * normal - lightDir);
 
-    float dotReflectedCamera = reflected.x * cameraDir.x + reflected.y * cameraDir.y + reflected.z * cameraDir.z;
+        float dotReflectedCamera = reflected.x * cameraDir.x + reflected.y * cameraDir.y + reflected.z * cameraDir.z;
 
-    float specular = pow(max(0.0f, (float)dotReflectedCamera), specularPower);
+        specular = pow(max(0.0f, (float)dotReflectedCamera), specularPower);
+    }
 
     return ambientFactor + diffuse + specular;
 }
