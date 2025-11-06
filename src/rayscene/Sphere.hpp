@@ -13,7 +13,7 @@ class Image;
 
 namespace rayscene {
 
-struct Material; // placeholder for future extensions
+struct Material; 
 
 class Sphere {
 public:
@@ -25,15 +25,17 @@ public:
     const math::Vec3& color() const noexcept;
 
     std::optional<math::HitInfo> intersect(const math::Ray& ray) const noexcept;
+    
+    // CORRECTION DE SIGNATURE : const Light& et ajout de zbuf
     static void DrawSphere(Image& image,
                            const math::Vec3& camOrigin,
                            int width,
                            int height,
                            const std::vector<Sphere>& spheres,
-                           Light light);
+                           const Light& light , // <-- Ajout de const&
+                         std::vector<math::Real>& zbuf); // <-- Ajout de zbuf
 
     math::Real reflectFactor() const noexcept;
-
     int specularPower() const noexcept;
 
 private:

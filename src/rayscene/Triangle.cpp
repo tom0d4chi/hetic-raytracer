@@ -1,145 +1,163 @@
 #include "Triangle.hpp"
+#include "Sphere.hpp"
+#include "Light.hpp"
+#include "../rayimage/Image.hpp"
+#include "../raymath/Color.hpp"
+#include "../rayshader/DiffuseShader.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <utility>
 
-namespace render {
+namespace rayscene {
 
-
-
-Triangle::Triangle(const Vec3& a, const Vec3& b, const Vec3& c,
-                   std::shared_ptr<Material> mat,
-                   bool backfaceCull) noexcept
-: m_v0(a), m_v1(b), m_v2(c),
-  m_material(std::move(mat)),
-  m_color(Vec3(1,1,1)),
-  m_backfaceCull(backfaceCull)
-{}
-
-Triangle::Triangle(const Vec3& a, const Vec3& b, const Vec3& c,
-                   std::shared_ptr<Material> mat, const Vec3& color,
-                   bool backfaceCull) noexcept
-: m_v0(a), m_v1(b), m_v2(c),
-  m_material(std::move(mat)),
-  m_color(color),
-  m_backfaceCull(backfaceCull)
-{}
+using math::HitInfo;
+using math::Ray;
+using math::Vec3;
+using math::Real;
+using ::Color;
 
 
+Triangle::Triangle(const Vec3& a, const Vec3& b, const Vec3& c, std::shared_ptr<Material> mat, const Real reflectFactor, int specularPower) noexcept
+    : m_a(a), m_b(b), m_c(c), m_material(std::move(mat)), m_color(Vec3(0, 1, 0)), m_reflectFactor(reflectFactor), m_specularPower(specularPower) {}
 
-std::optional<math::HitInfo> Triangle::intersect(const Ray& ray) const noexcept {
-    using math::Real;
+Triangle::Triangle(const Vec3& a, const Vec3& b, const Vec3& c, std::shared_ptr<Material> mat, const Vec3& color, const Real reflectFactor, int specularPower) noexcept
+    : m_a(a), m_b(b), m_c(c), m_material(std::move(mat)), m_color(color), m_reflectFactor(reflectFactor), m_specularPower(specularPower) {}
 
-    const Vec3 edge1 = m_v1 - m_v0;
-    const Vec3 edge2 = m_v2 - m_v0;
 
-    const Vec3 pvec = ray.direction().cross(edge2);
-    const Real det  = edge1.dot(pvec);
+std::optional<HitInfo> Triangle::intersect(const Ray& ray) const noexcept {
+    const Vec3 e1 = m_b - m_a;
+    const Vec3 e2 = m_c - m_a;
+    const Vec3 pvec = ray.direction().cross(e2);
+    const Real det  = e1.dot(pvec);
 
-    if (m_backfaceCull) {
-        if (det <= Real(0)) return std::nullopt;               // face dos caméra
-    } else {
-        if (std::abs(det) < Real(1e-8)) return std::nullopt;   // quasi parallèle
-    }
+    constexpr Real EPS = Real(1e-8);
+    if (det > -EPS && det < EPS) return std::nullopt; 
 
     const Real invDet = Real(1) / det;
-
-    const Vec3 tvec = ray.origin() - m_v0;
-    const Real u    = tvec.dot(pvec) * invDet;
+    const Vec3 tvec = ray.origin() - m_a;
+    const Real u = tvec.dot(pvec) * invDet;
     if (u < Real(0) || u > Real(1)) return std::nullopt;
 
-    const Vec3 qvec = tvec.cross(edge1);
-    const Real v    = ray.direction().dot(qvec) * invDet;
-    if (v < Real(0) || u + v > Real(1)) return std::nullopt;
+    const Vec3 qvec = tvec.cross(e1);
+    const Real v = ray.direction().dot(qvec) * invDet;
+    if (v < Real(0) || (u + v) > Real(1)) return std::nullopt;
 
-    const Real t = edge2.dot(qvec) * invDet;
-    if (t <= Real(0)) return std::nullopt; // derrière la caméra ou à 0
+    const Real t = e2.dot(qvec) * invDet;
+    if (t < math::RAY_MIN_T) return std::nullopt;
 
-    math::HitInfo hit{};
-    hit.t     = t;
-    hit.point = ray.at(t);
+    HitInfo info;
+    info.t = t;
+    info.point = ray.at(t);
+    const Vec3 outward = e1.cross(e2).normalized();
+    info.setFaceNormal(ray, outward);
+    info.uv.u = u;
+    info.uv.v = v;
 
-    // normale géométrique, orientée face caméra
-    Vec3 n = edge1.cross(edge2).normalized();
-    if (!m_backfaceCull && n.dot(ray.direction()) > Real(0)) n = -n;
-    hit.normal = n;
-
-    
-    return hit;
+    return info;
 }
 
-// --------------------- Rendu simple ---------------------
 
 void Triangle::DrawTriangles(Image& image,
-                             const math::Vec3& camOrigin,
+                             const Vec3& camOrigin,
                              int width,
                              int height,
                              const std::vector<Triangle>& triangles,
-                             Light light,
-                             int defaultSpecularPower)
+                             const std::vector<Sphere>& spheres,
+                             const Light& light , 
+                             std::vector<Real>& zbuf)
 {
-    using math::Vec3; using math::Real; using math::Ray; using math::HitInfo;
-
     if (width <= 0 || height <= 0) return;
 
     const Real aspect = Real(width) / Real(height);
     const Real focal_length = Real(4.0);
 
-    auto clamp01 = [](Real v) -> float {
-        if (v < Real(0)) return 0.0f;
-        if (v > Real(1)) return 1.0f;
-        return static_cast<float>(v);
+    auto clampColor = [](Real value) -> float {
+        if (value < 0) return 0.0f;
+        if (value > 1) return 1.0f;
+        return static_cast<float>(value);
     };
-    auto normalize = [](const Vec3& v){ return v.normalized(); };
-
-    const Vec3 lightPos = light.getPosition();
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-
+            
             const Real screenX = ((Real(2.0) * x / width) - Real(1.0)) * aspect;
             const Real screenY = (Real(2.0) * y / height) - Real(1.0);
 
-            Vec3 rayDir(screenX, screenY, focal_length); // caméra vers +Z
-            rayDir = rayDir.normalized();
-            Ray ray(camOrigin, rayDir);
+           
+            Vec3 rayDirection(screenX, -screenY, focal_length); 
+            rayDirection = rayDirection.normalized();
+            const Ray ray(camOrigin, rayDirection);
 
-            Real closestT = std::numeric_limits<Real>::infinity();
-            const Triangle* hitTri = nullptr;
+            Real closest_t = std::numeric_limits<Real>::infinity();
+            Vec3 baseColor(0.0, 0.0, 0.0);
+            bool hitTri = false;
             std::optional<HitInfo> closestHit;
+            int specularPowerToUse = 0;
+            Real reflectFactorToUse = Real(0);
 
+         
             for (const auto& tri : triangles) {
-                auto hit = tri.intersect(ray);
-                if (hit && hit->t < closestT) {
-                    closestT   = hit->t;
+                const auto hit = tri.intersect(ray);
+                if (hit && hit->t < closest_t) {
+                    closest_t = hit->t;
+                    baseColor = tri.color();
                     closestHit = hit;
-                    hitTri     = &tri;
+                    hitTri = true;
+                    specularPowerToUse = tri.specularPower();
+                    reflectFactorToUse = tri.reflectFactor();
                 }
             }
-            if (!hitTri || !closestHit) continue;
 
-            Vec3 N = closestHit->normal;
-            Vec3 L = normalize(lightPos - closestHit->point);
-            Vec3 V = normalize(camOrigin - closestHit->point);
-            Vec3 H = normalize(L + V);
+            const int idx = y * width + x; 
 
-            Real ndotl = std::max(Real(0), N.dot(L));
-            Real ndoth = std::max(Real(0), N.dot(H));
+            if (hitTri && closestHit && closest_t < zbuf[idx]) {
+                
+                DiffuseShader shader;
+                float intensity = shader.Shade(*closestHit, light, spheres, camOrigin, specularPowerToUse);
+                Vec3 shaded = baseColor * intensity;
 
-            Vec3 base = hitTri->color();
-            Vec3 ambient = base * Real(0.05);
-            Vec3 diffuse = base * ndotl;
-            Real spec = std::pow(ndoth, Real(defaultSpecularPower)) * Real(0.5);
+                // Réflexion
+                Vec3 reflectDir = ray.direction().reflect(closestHit->normal);
+                Ray reflectRay(closestHit->point, reflectDir);
+                Real reflect_closest_t = std::numeric_limits<Real>::infinity();
+                Vec3 reflectColor(0,0,0);
+                Real reflectFactor = reflectFactorToUse;
 
-            Vec3 rgb = ambient + diffuse + Vec3(spec, spec, spec);
+              
+                for (const auto& tri : triangles) {
+                    const auto hit = tri.intersect(reflectRay);
+                    if (hit && hit->t < reflect_closest_t) {
+                        reflect_closest_t = hit->t;
+                        reflectColor = tri.color();
+                        reflectFactor = std::max(reflectFactor, tri.reflectFactor());
+                    }
+                }
+              
+                for (const auto& sph : spheres) {
+                    const auto hit = sph.intersect(reflectRay);
+                    if (hit && hit->t < reflect_closest_t) {
+                        reflect_closest_t = hit->t;
+                        reflectColor = sph.color();
+                        reflectFactor = std::max(reflectFactor, sph.reflectFactor());
+                    }
+                }
 
-            image.SetPixel(
-                static_cast<unsigned>(x), static_cast<unsigned>(y),
-                Color(clamp01(rgb.x), clamp01(rgb.y), clamp01(rgb.z))
-            );
+                if (reflect_closest_t < std::numeric_limits<Real>::infinity()) {
+                    shaded = shaded + (reflectColor * reflectFactor * intensity);
+                }
+
+                const Color pixelColor(
+                    clampColor(shaded.x),
+                    clampColor(shaded.y),
+                    clampColor(shaded.z)
+                );
+                
+                image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
+                zbuf[idx] = closest_t;
+            }
         }
     }
 }
 
-} // namespace render
+} // namespace rayscene
