@@ -10,6 +10,7 @@
 #include <vector>
 
 class Image;
+class Plane;
 
 namespace rayscene {
 
@@ -30,7 +31,8 @@ public:
                            int width,
                            int height,
                            const std::vector<Sphere>& spheres,
-                           Light light);
+                           Light light,
+                           const Plane& plane);
 
     math::Real reflectFactor() const noexcept;
 
