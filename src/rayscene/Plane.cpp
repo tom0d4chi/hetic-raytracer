@@ -1,6 +1,9 @@
 #include "Plane.hpp"
 #include "../raymath/Ray.hpp"
 #include "../raymath/Vec3.hpp"
+#include "../rayscene/Light.hpp"
+#include "../rayscene/Sphere.hpp"
+#include "../rayshader/DiffuseShader.hpp"
 #include <cmath>
 
 using namespace std;
@@ -10,7 +13,7 @@ Plane::Plane(array<Color, 2> colors, float posY, float tileSize)
     : colors(colors), posY(posY), tileSize(tileSize) {
 }
 
-void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height) {
+void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height, const std::vector<rayscene::Sphere>& spheres, Light light) {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             // Convertir les coordonnées écran en coordonnées normalisées [-1, 1]
@@ -26,6 +29,14 @@ void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height
                 float t = (posY - ray.origin().y) / ray.direction().y;
 
                 Vec3 floorPoint = ray.at(t);
+
+                HitInfo hit;
+                hit.t = t;
+                hit.point = floorPoint;
+
+                DiffuseShader shader;
+                float shadowFactor = shader.ShadowFactorPlane(hit, light, spheres);
+
                 float floorX = floorPoint.x;
                 float floorZ = floorPoint.z;
 
@@ -33,7 +44,14 @@ void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height
                 int gridZ = (int)floor(floorZ / tileSize);
 
                 bool isWhite = (gridX + gridZ) % 2 == 0;
-                image.SetPixel(x, y, isWhite ? colors[0] : colors[1]);
+                Color baseColor = isWhite ? colors[0] : colors[1];
+                const Color shadedColor(
+                    baseColor.R() * shadowFactor,
+                    baseColor.G() * shadowFactor,
+                    baseColor.B() * shadowFactor
+                );
+
+                image.SetPixel(x, y, shadedColor);
             }
         }
     }

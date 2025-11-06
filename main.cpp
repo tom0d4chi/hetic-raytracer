@@ -49,14 +49,30 @@ int main()
     // spheres.emplace_back(Vec3(0.0, 1.5, 8.0), Real(1.0), nullptr, Vec3(0.2, 0.2, 1.0), 0.5, 50);
     // spheres.emplace_back(Vec3(2.0, 1.5, 8.0), Real(1.0), nullptr, Vec3(0.2, 1.0, 0.2), 0.7, 200);
 
-    Vec3 lightPos = light.getPosition();
+    // SETUP POUR BIEN VOIR LES OMBRES SUR LE PLAN
+
+    // // Position de la caméra
+    // Vec3 cam_origin(0, 2.0f, -5);
+
+    // // Position de la lumière (sur le côté et en hauteur)
+    // Light light(Vec3(-3.0, 4.0, 0.0));
+
+    // // 3 sphères alignées
+    // vector<Sphere> spheres;
+
+    // // Sphère rouge à gauche
+    // spheres.emplace_back(Vec3(-2.0, 1.0, 3.0), Real(1.0), nullptr, Vec3(1.0, 0.2, 0.2), 0.5, 100);
+
+    // // Sphère verte au centre
+    // spheres.emplace_back(Vec3(0.0, 0.8, 4.0), Real(0.8), nullptr, Vec3(0.2, 1.0, 0.2), 0.5, 100);
+
+    // // Sphère bleue à droite
+    // spheres.emplace_back(Vec3(2.0, 1.2, 5.0), Real(1.2), nullptr, Vec3(0.2, 0.2, 1.0), 0.5, 100);
 
     // Paramètres de la caméra et du plan
     Vec3 cam_origin(0, 1.5f, -8);
     array<Color, 2> planeColors = {white, black};
     Plane plane(planeColors, 0.0f, 1.0f);
-
-    plane.DrawPlane(image, cam_origin, width, height);
 
     // Création de plusieurs sphères avec couleurs, positions et tailles variées
     vector<Sphere> spheres;
@@ -101,6 +117,8 @@ int main()
     spheres.emplace_back(Vec3(-3.0, 2.5, 18.6), Real(1.3), nullptr, Vec3(0.8, 1.0, 0.8), 0.5, 200); // vert pâle
     spheres.emplace_back(Vec3(0.0, 2.0, 19.3), Real(1.6), nullptr, Vec3(1.0, 0.6, 0.0), 0.5, 200);  // or
     spheres.emplace_back(Vec3(-7.0, 2.3, 20.0), Real(0.9), nullptr, Vec3(0.8, 0.2, 0.9), 0.5, 200); // violet foncé
+
+    plane.DrawPlane(image, cam_origin, width, height, spheres, light);
 
     Sphere::DrawSphere(image, cam_origin, width, height, spheres, light);
 
