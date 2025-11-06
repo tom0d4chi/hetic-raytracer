@@ -46,3 +46,26 @@ float DiffuseShader::Shade(math::HitInfo hitInfo, Light light, const std::vector
 
     return ambientFactor + diffuse + specular;
 }
+
+float DiffuseShader::ShadowFactorPlane(math::HitInfo hitInfo, Light light, const std::vector<rayscene::Sphere>& spheres) {
+    float ambientFactor = 0.3f;
+
+    Vec3 lightPos = light.getPosition();
+
+    Vec3 lightVector = Vec3(lightPos.x - hitInfo.point.x, lightPos.y - hitInfo.point.y, lightPos.z - hitInfo.point.z);
+
+    float distanceToLight = lightVector.length();
+
+    Vec3 lightDir = lightVector.normalize();
+
+    Ray shadowRay(hitInfo.point, lightDir);
+
+    for (const auto& sphere : spheres) {
+        const auto hit = sphere.intersect(shadowRay);
+        if (hit && hit->t < distanceToLight) {
+            return ambientFactor;
+        }
+    }
+
+    return 1.0f;
+}

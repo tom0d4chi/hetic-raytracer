@@ -34,17 +34,3 @@ target_link_libraries(hetic-raytracer PUBLIC
                       lodepng
                       Threads::Threads
                       )
-
-add_executable(render_plane tools/render_plane.cpp)
-target_include_directories(render_plane PRIVATE
-                           "${PROJECT_SOURCE_DIR}/src"
-                           )
-target_sources(render_plane PRIVATE
-                src/raytimer/Timer.cpp
-)
-
-target_link_libraries(render_plane PRIVATE
-                      rayimage
-                      rayscene
-                      lodepng
-                      )
