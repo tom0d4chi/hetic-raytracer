@@ -13,6 +13,30 @@ Plane::Plane(array<Color, 2> colors, float posY, float tileSize)
     : colors(colors), posY(posY), tileSize(tileSize) {
 }
 
+std::optional<HitInfo> Plane::intersect(const Ray& ray) const noexcept {
+    Real t = (posY - ray.origin().y) / ray.direction().y;
+
+    if (t < RAY_MIN_T) {
+        return std::nullopt;
+    }
+
+    HitInfo info;
+    info.t = t;
+    info.point = ray.at(t);
+
+    return info;
+}
+
+Vec3 Plane::getColorAt(const Vec3& point) const noexcept {
+    int gridX = static_cast<int>(floor(point.x / tileSize));
+    int gridZ = static_cast<int>(floor(point.z / tileSize));
+
+    bool isWhite = (gridX + gridZ) % 2 == 0;
+
+    Color baseColor = isWhite ? colors[0] : colors[1];
+    return Vec3(baseColor.R(), baseColor.G(), baseColor.B());
+}
+
 void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height, const std::vector<rayscene::Sphere>& spheres, Light light) {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
