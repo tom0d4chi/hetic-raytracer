@@ -57,6 +57,23 @@ int Sphere::specularPower() const noexcept {
     return m_specularPower;
 }
 
+Vec3 Sphere::getShadedColor(const HitInfo& hit, const Ray& incidentRay, Light light, const std::vector<Sphere>& spheres, const Vec3& camera, const Plane& plane) const noexcept {
+    DiffuseShader shader;
+    float intensity = shader.Shade(hit, light, spheres, camera, m_specularPower);
+    Vec3 baseColor = m_color * intensity;
+
+    Vec3 reflectDir = incidentRay.direction().reflect(hit.normal);
+    Ray reflectRay(hit.point, reflectDir);
+
+    const auto planeHit = plane.intersect(reflectRay);
+    if (planeHit) {
+        Vec3 planeColor = plane.getColorAt(planeHit->point);
+        baseColor = baseColor + (planeColor * intensity * m_reflectFactor);
+    }
+
+    return baseColor;
+}
+
 std::optional<HitInfo> Sphere::intersect(const Ray& ray) const noexcept {
     const Vec3 oc = ray.origin() - m_center;
     const math::Real a = ray.direction().dot(ray.direction());

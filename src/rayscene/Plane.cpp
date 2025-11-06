@@ -91,7 +91,8 @@ void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height
                     const auto sphereHit = sphere.intersect(reflectRay);
                     if (sphereHit && sphereHit->t < reflect_closest_t) {
                         reflect_closest_t = sphereHit->t;
-                        shadedColor = (shadedColor + (sphere.color() * sphere.reflectFactor())) * shadowFactor;
+                        Vec3 sphereShadedColor = sphere.getShadedColor(*sphereHit, reflectRay, light, spheres, camOrigin, *this);
+                        shadedColor = (shadedColor + (sphereShadedColor * sphere.reflectFactor())) * shadowFactor;
                     }
                 }
 

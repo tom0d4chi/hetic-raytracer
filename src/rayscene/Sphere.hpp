@@ -38,6 +38,8 @@ public:
 
     int specularPower() const noexcept;
 
+    math::Vec3 getShadedColor(const math::HitInfo& hit, const math::Ray& incidentRay, Light light, const std::vector<Sphere>& spheres, const math::Vec3& camera, const Plane& plane) const noexcept;
+
 private:
     math::Vec3 m_center;
     math::Real m_radius;
