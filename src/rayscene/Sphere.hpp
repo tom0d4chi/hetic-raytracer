@@ -10,6 +10,7 @@
 #include <vector>
 
 class Image;
+class Plane;
 
 namespace rayscene {
 
@@ -30,11 +31,14 @@ public:
                            int width,
                            int height,
                            const std::vector<Sphere>& spheres,
-                           Light light);
+                           Light light,
+                           const Plane& plane);
 
     math::Real reflectFactor() const noexcept;
 
     int specularPower() const noexcept;
+
+    math::Vec3 getShadedColor(const math::HitInfo& hit, const math::Ray& incidentRay, Light light, const std::vector<Sphere>& spheres, const math::Vec3& camera, const Plane& plane) const noexcept;
 
 private:
     math::Vec3 m_center;

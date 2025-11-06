@@ -120,7 +120,7 @@ int main()
 
     plane.DrawPlane(image, cam_origin, width, height, spheres, light);
 
-    Sphere::DrawSphere(image, cam_origin, width, height, spheres, light);
+    Sphere::DrawSphere(image, cam_origin, width, height, spheres, light, plane);
 
     image.WriteFile("test.png");
 
