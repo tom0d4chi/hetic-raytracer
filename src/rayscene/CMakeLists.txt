@@ -2,6 +2,7 @@ add_library(rayscene
   ${CMAKE_CURRENT_SOURCE_DIR}/Plane.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Sphere.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Light.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/SceneLoader.cpp
 )
 
 target_link_libraries(rayscene PUBLIC raymath)
