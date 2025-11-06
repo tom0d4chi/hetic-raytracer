@@ -1,6 +1,9 @@
 #include "Sphere.hpp"
 #include "../rayimage/Image.hpp"
 #include "../raymath/Color.hpp"
+#include "Light.hpp"
+#include "Plane.hpp"
+#include "../rayshader/DiffuseShader.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -14,20 +17,24 @@ using math::Vec3;
 using math::Real;
 using ::Color;
 
-Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat) noexcept
+Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const math::Real reflectFactor, int specularPower) noexcept
     : m_center(center)
     , m_radius(radius)
     , m_radius2(radius * radius)
     , m_material(std::move(mat))
     , m_color(Vec3(0, 1, 0)) // default green
+    , m_reflectFactor(reflectFactor)
+    , m_specularPower(specularPower)
 {}
 
-Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const Vec3& color) noexcept
+Sphere::Sphere(const Vec3& center, math::Real radius, std::shared_ptr<Material> mat, const Vec3& color, const math::Real reflectFactor, int specularPower) noexcept
     : m_center(center)
     , m_radius(radius)
     , m_radius2(radius * radius)
     , m_material(std::move(mat))
     , m_color(color)
+    , m_reflectFactor(reflectFactor)
+    , m_specularPower(specularPower)
 {}
 
 const Vec3& Sphere::center() const noexcept {
@@ -40,6 +47,31 @@ math::Real Sphere::radius() const noexcept {
 
 const Vec3& Sphere::color() const noexcept {
     return m_color;
+}
+
+math::Real Sphere::reflectFactor() const noexcept {
+    return m_reflectFactor;
+}
+
+int Sphere::specularPower() const noexcept {
+    return m_specularPower;
+}
+
+Vec3 Sphere::getShadedColor(const HitInfo& hit, const Ray& incidentRay, Light light, const std::vector<Sphere>& spheres, const Vec3& camera, const Plane& plane) const noexcept {
+    DiffuseShader shader;
+    float intensity = shader.Shade(hit, light, spheres, camera, m_specularPower);
+    Vec3 baseColor = m_color * intensity;
+
+    Vec3 reflectDir = incidentRay.direction().reflect(hit.normal);
+    Ray reflectRay(hit.point, reflectDir);
+
+    const auto planeHit = plane.intersect(reflectRay);
+    if (planeHit) {
+        Vec3 planeColor = plane.getColorAt(planeHit->point);
+        baseColor = baseColor + (planeColor * intensity * m_reflectFactor);
+    }
+
+    return baseColor;
 }
 
 std::optional<HitInfo> Sphere::intersect(const Ray& ray) const noexcept {
@@ -71,7 +103,9 @@ void Sphere::DrawSphere(Image& image,
                         const Vec3& camOrigin,
                         int width,
                         int height,
-                        const std::vector<Sphere>& spheres) {
+                        const std::vector<Sphere>& spheres,
+                        Light light,
+                        const Plane& plane) {
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -98,28 +132,56 @@ void Sphere::DrawSphere(Image& image,
             const Real screenX = ((Real(2.0) * x / width) - Real(1.0)) * aspect;
             const Real screenY = (Real(2.0) * y / height) - Real(1.0);
 
-            Vec3 rayDirection(screenX, screenY, focal_length);
+            Vec3 rayDirection(screenX, -screenY, focal_length);
             rayDirection = rayDirection.normalized();
             const Ray ray(camOrigin, rayDirection);
 
             Real closest_t = std::numeric_limits<Real>::infinity();
             Vec3 color(0.0, 0.0, 0.0);
             bool hitSphere = false;
+            std::optional<HitInfo> closestHit;
+            int specularPowerToUse = 0;
+            Real reflectFactorToUse = 0;
 
             for (const auto& sphere : spheres) {
                 const auto hit = sphere.intersect(ray);
                 if (hit && hit->t < closest_t) {
                     closest_t = hit->t;
                     color = sphere.color();
+                    closestHit = hit;
                     hitSphere = true;
+                    specularPowerToUse = sphere.specularPower();
+                    reflectFactorToUse = sphere.reflectFactor();
                 }
             }
 
-            if (hitSphere) {
+            if (hitSphere && closestHit) {
+                DiffuseShader shader;
+                float intensity = shader.Shade(*closestHit, light, spheres, camOrigin, specularPowerToUse);
+                Vec3 baseColor = color * intensity;
+
+                Vec3 reflectDir = ray.direction().reflect(closestHit->normal);
+                Ray reflectRay(closestHit->point, reflectDir);
+                Real reflect_closest_t = std::numeric_limits<Real>::infinity();
+
+                for (const auto& sphere : spheres) {
+                    const auto hit = sphere.intersect(reflectRay);
+                    if (hit && hit->t < reflect_closest_t) {
+                        reflect_closest_t = hit->t;
+                        baseColor = baseColor + (sphere.color() * sphere.reflectFactor() * intensity);
+                    }
+                }
+
+                const auto planeHit = plane.intersect(reflectRay);
+                if (planeHit) {
+                    Vec3 planeColor = plane.getColorAt(planeHit->point);
+                    baseColor = baseColor + (planeColor * intensity * reflectFactorToUse);
+                }
+
                 const Color pixelColor(
-                    clampColor(color.x),
-                    clampColor(color.y),
-                    clampColor(color.z)
+                    clampColor(baseColor.x),
+                    clampColor(baseColor.y),
+                    clampColor(baseColor.z)
                 );
 
                 image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
