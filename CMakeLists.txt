@@ -21,6 +21,7 @@ add_subdirectory(./src/rayscene)
 add_subdirectory(./src/raytimer)
 add_subdirectory(./src/rayshader)
 add_subdirectory(./src/lodepng)
+add_subdirectory(./src/nlohmann)
 
 
 find_package(Threads REQUIRED)
@@ -32,5 +33,6 @@ target_link_libraries(hetic-raytracer PUBLIC
                       raytimer
                       rayshader
                       lodepng
+                      nlohmann
                       Threads::Threads
                       )
