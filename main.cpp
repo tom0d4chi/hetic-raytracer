@@ -9,6 +9,8 @@
 #include "Plane.hpp"
 #include "Sphere.hpp"
 #include "Light.hpp"
+#include "Triangle.hpp"
+
 
 using namespace std;
 using namespace math;
@@ -103,6 +105,24 @@ int main()
     spheres.emplace_back(Vec3(-7.0, 2.3, 20.0), Real(0.9), nullptr, Vec3(0.8, 0.2, 0.9), 0.5, 200); // violet foncé
 
     Sphere::DrawSphere(image, cam_origin, width, height, spheres, light);
+
+using render::Triangle;
+
+std::vector<Triangle> tris;
+auto tri = [&](const Vec3& a, const Vec3& b, const Vec3& c, const Vec3& col) {
+    tris.emplace_back(a, b, c, nullptr, col, /*backfaceCull=*/false);
+};
+
+
+
+tri(Vec3(-6.0, 6.5,  9.0), Vec3(-3.8, 5.2, 10.8), Vec3(-5.2, 6.8, 12.5), Vec3(1.0, 0.25, 0.25)); //noir
+tri(Vec3(-1.0, 5.8, 11.0), Vec3( 1.4, 6.6, 12.6), Vec3( 0.2, 5.0, 13.8), Vec3(0.25, 0.7, 1.0));  // bleu
+tri(Vec3( 3.2, 6.8,  8.5), Vec3( 5.8, 5.4, 10.2), Vec3( 4.6, 7.0, 11.8), Vec3(0.2, 1.0, 0.45));  // vert
+tri(Vec3( 6.5, 7.2, 12.0), Vec3( 8.8, 5.6, 13.6), Vec3(10.0, 6.9, 15.2), Vec3(1.0, 0.6, 0.2));   //
+tri(Vec3(-3.0, 5.4, 15.2), Vec3(-0.6, 6.3, 16.8), Vec3( 1.6, 5.1, 17.8), Vec3(0.75, 0.45, 1.0)); // violet
+
+Triangle::DrawTriangles(image, cam_origin, width, height, tris, light);
+
 
     image.WriteFile("test.png");
 
