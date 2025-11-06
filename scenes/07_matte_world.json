@@ -1,0 +1,85 @@
+{
+    "image": {
+        "width": 1920,
+        "height": 1080,
+        "background": [0.4, 0.35, 0.3]
+    },
+    "output": "07_matte_world.png",
+    "timer_label": "Rendering Matte World",
+    "camera": {
+        "origin": [2, 1.2, -5],
+        "look_at": [0, 0.8, 1],
+        "up": [0, 1, 0],
+        "vertical_fov": 60,
+        "focus_distance": 1.0
+    },
+    "plane": {
+        "colors": [
+            [0.6, 0.5, 0.4],
+            [0.5, 0.4, 0.3]
+        ],
+        "posY": 0.0,
+        "tileSize": 1.5
+    },
+    "light": {
+        "position": [4.0, 7.0, -2.0]
+    },
+    "spheres": [
+        {
+            "center": [0, 1.2, 0],
+            "radius": 1.2,
+            "color": [0.6, 0.3, 0.2],
+            "reflectFactor": 0.0,
+            "specularPower": 5
+        },
+        {
+            "center": [-2.5, 0.8, 2],
+            "radius": 0.8,
+            "color": [0.4, 0.5, 0.3],
+            "reflectFactor": 0.0,
+            "specularPower": 8
+        },
+        {
+            "center": [2.5, 0.8, 2],
+            "radius": 0.8,
+            "color": [0.5, 0.4, 0.5],
+            "reflectFactor": 0.05,
+            "specularPower": 15
+        },
+        {
+            "center": [-1.5, 0.6, 4.5],
+            "radius": 0.6,
+            "color": [0.7, 0.5, 0.3],
+            "reflectFactor": 0.0,
+            "specularPower": 10
+        },
+        {
+            "center": [1.5, 0.6, 4.5],
+            "radius": 0.6,
+            "color": [0.3, 0.4, 0.5],
+            "reflectFactor": 0.08,
+            "specularPower": 20
+        },
+        {
+            "center": [0, 0.5, 6.5],
+            "radius": 0.5,
+            "color": [0.6, 0.4, 0.4],
+            "reflectFactor": 0.0,
+            "specularPower": 12
+        },
+        {
+            "center": [-3.5, 0.4, -1],
+            "radius": 0.4,
+            "color": [0.5, 0.5, 0.3],
+            "reflectFactor": 0.0,
+            "specularPower": 6
+        },
+        {
+            "center": [3.5, 0.4, -1],
+            "radius": 0.4,
+            "color": [0.4, 0.3, 0.5],
+            "reflectFactor": 0.1,
+            "specularPower": 25
+        }
+    ]
+}
