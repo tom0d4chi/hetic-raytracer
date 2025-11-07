@@ -12,7 +12,6 @@
 #include "Sphere.hpp"
 #include "Light.hpp"
 #include "SceneLoader.hpp"
-#include "Constants.hpp"
 
 using namespace std;
 using namespace math;
