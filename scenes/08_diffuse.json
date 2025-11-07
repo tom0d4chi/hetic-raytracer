@@ -1,0 +1,73 @@
+{
+    "image": {
+        "width": 1920,
+        "height": 1080,
+        "background": [
+            0,
+            0,
+            0
+        ]
+    },
+    "output": "08_diffuse_demo.png",
+    "timer_label": "Generation de l'image",
+    "echantillonsNumber": 16,
+    "camera": {
+        "origin": [
+            0,
+            1.5,
+            -8
+        ],
+        "look_at": [
+            0,
+            1,
+            0
+        ],
+        "up": [
+            0,
+            1,
+            0
+        ],
+        "vertical_fov": 50,
+        "focus_distance": 1.0
+    },
+    "plane": {
+        "colors": [
+            [
+                1,
+                1,
+                1
+            ],
+            [
+                0.1,
+                0.1,
+                0.1
+            ]
+        ],
+        "posY": 0.0,
+        "tileSize": 1.0
+    },
+    "light": {
+        "position": [
+            -5.0,
+            1.0,
+            0.0
+        ]
+    },
+    "spheres": [
+        {
+            "center": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "radius": 0.5,
+            "color": [
+                1.0,
+                0.0,
+                0.0
+            ],
+            "reflectFactor": 0.0,
+            "specularPower": 50
+        }
+    ]
+}
