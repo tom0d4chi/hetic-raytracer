@@ -6,6 +6,7 @@
     },
     "output": "07_matte_world.png",
     "timer_label": "Rendering Matte World",
+    "echantillonsNumber": 1,
     "camera": {
         "origin": [2, 1.2, -5],
         "look_at": [0, 0.8, 1],

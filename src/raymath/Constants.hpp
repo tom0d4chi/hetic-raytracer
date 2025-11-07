@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 namespace math {
 
 // Type configuration
@@ -19,5 +21,13 @@ constexpr Real SHADOW_BIAS = 1e-4;       // Bias pour shadow rays
 // Utils de conversion
 constexpr Real DEG_TO_RAD = PI / 180.0;
 constexpr Real RAD_TO_DEG = 180.0 / PI;
+
+inline Real randomReal() {
+    return static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
+}
+
+inline Real randomReal(Real min, Real max) {
+    return min + (max - min) * randomReal();
+}
 
 } // namespace math

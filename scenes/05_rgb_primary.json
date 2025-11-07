@@ -6,6 +6,7 @@
     },
     "output": "05_rgb_primary.png",
     "timer_label": "Rendering RGB Primary Colors",
+    "echantillonsNumber": 1,
     "camera": {
         "origin": [0, 1.3, -6],
         "look_at": [0, 1, 0],

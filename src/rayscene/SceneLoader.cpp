@@ -53,6 +53,7 @@ SceneConfig LoadSceneFromJson(const std::string& filepath) {
 
     config.outputPath = root.value("output", std::string("scene.png"));
     config.timerLabel = root.value("timer_label", std::string("Scene render"));
+    config.echantillonsNumber = root.value("echantillonsNumber", 1);
 
     const auto& camera = root.at("camera");
     config.camera.origin = readVec3(camera.at("origin"), "camera.origin");

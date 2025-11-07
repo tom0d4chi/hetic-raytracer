@@ -21,7 +21,7 @@ class Plane {
     public:
         Plane(array<Color, 2> colors, float posY = 0.0f, float tileSize = 1.0f);
 
-        void DrawPlane(Image& image, const Vec3& camOrigin, int width, int height, const std::vector<rayscene::Sphere>& spheres, Light light);
+        void DrawPlane(Image& image, const Vec3& camOrigin, int width, int height, const std::vector<rayscene::Sphere>& spheres, Light light, int echantillonsNumber = 1);
 
         optional<HitInfo> intersect(const Ray& ray) const noexcept;
 

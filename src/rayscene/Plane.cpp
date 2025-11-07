@@ -37,7 +37,7 @@ Vec3 Plane::getColorAt(const Vec3& point) const noexcept {
     return Vec3(baseColor.R(), baseColor.G(), baseColor.B());
 }
 
-void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height, const std::vector<rayscene::Sphere>& spheres, Light light) {
+void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height, const std::vector<rayscene::Sphere>& spheres, Light light, int echantillonsNumber) {
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -47,57 +47,68 @@ void Plane::DrawPlane(Image& image, const Vec3& camOrigin, int width, int height
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            const Real screenX = ((Real(2.0) * x / width) - Real(1.0)) * aspect;
-            const Real screenY = (Real(2.0) * y / height) - Real(1.0);
+            Vec3 accumulatorColor(0, 0, 0);
 
-            Vec3 rayDirection(screenX, -screenY, focal_length);
-            rayDirection = rayDirection.normalized();
-            const Ray ray(camOrigin, rayDirection);
+            for (int echantillon = 0; echantillon < echantillonsNumber; ++echantillon) {
+                Real sampleX = Real(x) + randomReal(0, 1);
+                Real sampleY = Real(y) + randomReal(0, 1);
 
-            if (ray.direction().y < 0) {
-                // Calculer distance t jusqu'au plan
-                float t = (posY - ray.origin().y) / ray.direction().y;
+                const Real screenX = ((Real(2.0) * sampleX / width) - Real(1.0)) * aspect;
+                const Real screenY = (Real(2.0) * sampleY / height) - Real(1.0);
 
-                Vec3 floorPoint = ray.at(t);
+                Vec3 rayDirection(screenX, -screenY, focal_length);
+                rayDirection = rayDirection.normalized();
+                const Ray ray(camOrigin, rayDirection);
 
-                float floorX = floorPoint.x;
-                float floorZ = floorPoint.z;
+                if (ray.direction().y < 0) {
+                    // Calculer distance t jusqu'au plan
+                    float t = (posY - ray.origin().y) / ray.direction().y;
 
-                int gridX = (int)floor(floorX / tileSize);
-                int gridZ = (int)floor(floorZ / tileSize);
+                    Vec3 floorPoint = ray.at(t);
 
-                HitInfo hit;
-                hit.t = t;
-                hit.point = floorPoint;
+                    float floorX = floorPoint.x;
+                    float floorZ = floorPoint.z;
 
-                DiffuseShader shader;
-                float shadowFactor = shader.ShadowFactorPlane(hit, light, spheres);
+                    int gridX = (int)floor(floorX / tileSize);
+                    int gridZ = (int)floor(floorZ / tileSize);
 
-                bool isWhite = (gridX + gridZ) % 2 == 0;
-                Color baseColor = isWhite ? colors[0] : colors[1];
+                    HitInfo hit;
+                    hit.t = t;
+                    hit.point = floorPoint;
 
-                Vec3 shadedColor(
-                    baseColor.R() * shadowFactor,
-                    baseColor.G() * shadowFactor,
-                    baseColor.B() * shadowFactor
-                );
+                    DiffuseShader shader;
+                    float shadowFactor = shader.ShadowFactorPlane(hit, light, spheres);
 
-                Vec3 planeNormal(0, 1, 0);
-                Vec3 reflectDir = ray.direction().reflect(planeNormal);
-                Ray reflectRay(hit.point, reflectDir);
-                Real reflect_closest_t = numeric_limits<Real>::infinity();
+                    bool isWhite = (gridX + gridZ) % 2 == 0;
+                    Color baseColor = isWhite ? colors[0] : colors[1];
 
-                for (const auto& sphere : spheres) {
-                    const auto sphereHit = sphere.intersect(reflectRay);
-                    if (sphereHit && sphereHit->t < reflect_closest_t) {
-                        reflect_closest_t = sphereHit->t;
-                        Vec3 sphereShadedColor = sphere.getShadedColor(*sphereHit, reflectRay, light, spheres, camOrigin, *this);
-                        shadedColor = (shadedColor + (sphereShadedColor * sphere.reflectFactor())) * shadowFactor;
+                    Vec3 shadedColor(
+                        baseColor.R() * shadowFactor,
+                        baseColor.G() * shadowFactor,
+                        baseColor.B() * shadowFactor
+                    );
+
+                    Vec3 planeNormal(0, 1, 0);
+                    Vec3 reflectDir = ray.direction().reflect(planeNormal);
+                    Ray reflectRay(hit.point, reflectDir);
+                    Real reflect_closest_t = numeric_limits<Real>::infinity();
+
+                    for (const auto& sphere : spheres) {
+                        const auto sphereHit = sphere.intersect(reflectRay);
+                        if (sphereHit && sphereHit->t < reflect_closest_t) {
+                            reflect_closest_t = sphereHit->t;
+                            Vec3 sphereShadedColor = sphere.getShadedColor(*sphereHit, reflectRay, light, spheres, camOrigin, *this);
+                            shadedColor = (shadedColor + (sphereShadedColor * sphere.reflectFactor())) * shadowFactor;
+                        }
                     }
-                }
 
-                image.SetPixel(x, y, Color(shadedColor.x, shadedColor.y, shadedColor.z));
+                    accumulatorColor = accumulatorColor + shadedColor;
+                }
             }
+
+            Vec3 finalColor(accumulatorColor.x / echantillonsNumber, accumulatorColor.y / echantillonsNumber, accumulatorColor.z / echantillonsNumber);
+
+            image.SetPixel(x, y, Color(finalColor.x, finalColor.y, finalColor.z));
         }
     }
 }

@@ -6,6 +6,7 @@
     },
     "output": "04_sunset_warmth.png",
     "timer_label": "Rendering Sunset Scene",
+    "echantillonsNumber": 1,
     "camera": {
         "origin": [2, 0.9, -4],
         "look_at": [0, 0.7, 1],
