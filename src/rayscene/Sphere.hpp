@@ -32,7 +32,8 @@ public:
                            int height,
                            const std::vector<Sphere>& spheres,
                            Light light,
-                           const Plane& plane);
+                           const Plane& plane,
+                           int echantillonsNumber = 1);
 
     math::Real reflectFactor() const noexcept;
 

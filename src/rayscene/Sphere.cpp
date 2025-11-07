@@ -1,6 +1,7 @@
 #include "Sphere.hpp"
 #include "../rayimage/Image.hpp"
 #include "../raymath/Color.hpp"
+#include "../raymath/Constants.hpp"
 #include "Light.hpp"
 #include "Plane.hpp"
 #include "../rayshader/DiffuseShader.hpp"
@@ -105,7 +106,8 @@ void Sphere::DrawSphere(Image& image,
                         int height,
                         const std::vector<Sphere>& spheres,
                         Light light,
-                        const Plane& plane) {
+                        const Plane& plane,
+                        int echantillonsNumber) {
     if (width <= 0 || height <= 0) {
         return;
     }
@@ -125,63 +127,73 @@ void Sphere::DrawSphere(Image& image,
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            const Real u = (Real(x) + Real(0.5)) / Real(width);
-            const Real v = (Real(height - 1 - y) + Real(0.5)) / Real(height);
+            Vec3 accumulatorColor(0, 0, 0);
 
-            // Calcul de la direction du rayon avec focal_length
-            const Real screenX = ((Real(2.0) * x / width) - Real(1.0)) * aspect;
-            const Real screenY = (Real(2.0) * y / height) - Real(1.0);
+            for (int echantillon = 0; echantillon < echantillonsNumber; ++echantillon) {
+                Real sampleX = Real(x) + randomReal(0, 1);
+                Real sampleY = Real(y) + randomReal(0, 1);
 
-            Vec3 rayDirection(screenX, -screenY, focal_length);
-            rayDirection = rayDirection.normalized();
-            const Ray ray(camOrigin, rayDirection);
+                const Real screenX = ((Real(2.0) * sampleX / width) - Real(1.0)) * aspect;
+                const Real screenY = (Real(2.0) * sampleY / height) - Real(1.0);
 
-            Real closest_t = std::numeric_limits<Real>::infinity();
-            Vec3 color(0.0, 0.0, 0.0);
-            bool hitSphere = false;
-            std::optional<HitInfo> closestHit;
-            int specularPowerToUse = 0;
-            Real reflectFactorToUse = 0;
+                Vec3 rayDirection(screenX, -screenY, focal_length);
+                rayDirection = rayDirection.normalized();
+                const Ray ray(camOrigin, rayDirection);
+    
+                Real closest_t = std::numeric_limits<Real>::infinity();
+                Vec3 color(0.0, 0.0, 0.0);
+                bool hitSphere = false;
+                std::optional<HitInfo> closestHit;
+                int specularPowerToUse = 0;
+                Real reflectFactorToUse = 0;
+    
+                for (const auto& sphere : spheres) {
+                    const auto hit = sphere.intersect(ray);
+                    if (hit && hit->t < closest_t) {
+                        closest_t = hit->t;
+                        color = sphere.color();
+                        closestHit = hit;
+                        hitSphere = true;
+                        specularPowerToUse = sphere.specularPower();
+                        reflectFactorToUse = sphere.reflectFactor();
+                    }
+                }
+    
+                if (hitSphere && closestHit) {
+                    DiffuseShader shader;
+                    float intensity = shader.Shade(*closestHit, light, spheres, camOrigin, specularPowerToUse);
+                    Vec3 baseColor = color * intensity;
 
-            for (const auto& sphere : spheres) {
-                const auto hit = sphere.intersect(ray);
-                if (hit && hit->t < closest_t) {
-                    closest_t = hit->t;
-                    color = sphere.color();
-                    closestHit = hit;
-                    hitSphere = true;
-                    specularPowerToUse = sphere.specularPower();
-                    reflectFactorToUse = sphere.reflectFactor();
+                    Vec3 reflectDir = ray.direction().reflect(closestHit->normal);
+                    Ray reflectRay(closestHit->point, reflectDir);
+                    Real reflect_closest_t = std::numeric_limits<Real>::infinity();
+
+                    for (const auto& sphere : spheres) {
+                        const auto hit = sphere.intersect(reflectRay);
+                        if (hit && hit->t < reflect_closest_t) {
+                            reflect_closest_t = hit->t;
+                            baseColor = baseColor + (sphere.color() * sphere.reflectFactor() * intensity);
+                        }
+                    }
+
+                    const auto planeHit = plane.intersect(reflectRay);
+                    if (planeHit) {
+                        Vec3 planeColor = plane.getColorAt(planeHit->point);
+                        baseColor = baseColor + (planeColor * intensity * reflectFactorToUse);
+                    }
+
+                    accumulatorColor = accumulatorColor + baseColor;
                 }
             }
 
-            if (hitSphere && closestHit) {
-                DiffuseShader shader;
-                float intensity = shader.Shade(*closestHit, light, spheres, camOrigin, specularPowerToUse);
-                Vec3 baseColor = color * intensity;
-
-                Vec3 reflectDir = ray.direction().reflect(closestHit->normal);
-                Ray reflectRay(closestHit->point, reflectDir);
-                Real reflect_closest_t = std::numeric_limits<Real>::infinity();
-
-                for (const auto& sphere : spheres) {
-                    const auto hit = sphere.intersect(reflectRay);
-                    if (hit && hit->t < reflect_closest_t) {
-                        reflect_closest_t = hit->t;
-                        baseColor = baseColor + (sphere.color() * sphere.reflectFactor() * intensity);
-                    }
-                }
-
-                const auto planeHit = plane.intersect(reflectRay);
-                if (planeHit) {
-                    Vec3 planeColor = plane.getColorAt(planeHit->point);
-                    baseColor = baseColor + (planeColor * intensity * reflectFactorToUse);
-                }
+            // Ne pas écrire le pixel si aucune sphère n'a été touchée (pour ne pas écraser le plan)
+            if (accumulatorColor.x > 0.0 || accumulatorColor.y > 0.0 || accumulatorColor.z > 0.0) {
+                Vec3 finalColor(accumulatorColor.x / echantillonsNumber, accumulatorColor.y / echantillonsNumber, accumulatorColor.z / echantillonsNumber);
 
                 const Color pixelColor(
-                    clampColor(baseColor.x),
-                    clampColor(baseColor.y),
-                    clampColor(baseColor.z)
+                    clampColor(finalColor.x),
+                    clampColor(finalColor.y),
+                    clampColor(finalColor.z)
                 );
 
                 image.SetPixel(static_cast<unsigned>(x), static_cast<unsigned>(y), pixelColor);
