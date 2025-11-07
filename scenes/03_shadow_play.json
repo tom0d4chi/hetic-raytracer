@@ -6,6 +6,7 @@
     },
     "output": "03_shadow_play.png",
     "timer_label": "Rendering Shadow Play Scene",
+    "echantillonsNumber": 1,
     "camera": {
         "origin": [3, 1.5, -6],
         "look_at": [0, 0.7, 1],

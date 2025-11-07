@@ -6,6 +6,7 @@
     },
     "output": "01_mirror_balls.png",
     "timer_label": "Rendering Mirror Balls Scene",
+    "echantillonsNumber": 1,
     "camera": {
         "origin": [0, 1.2, -5],
         "look_at": [0, 0.8, 0],
