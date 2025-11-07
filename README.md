@@ -12,7 +12,6 @@ Conventions recommandées :
 
 Organisation :
 - raymath/ : helpers vectoriels & géométriques (headers accessibles globalement).
-- doc/ : notes mathématiques, recommandations numériques.
 
 Notes :
 - Le module `raymath` ne doit dépendre d'aucun autre module du projet.
