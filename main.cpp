@@ -12,6 +12,7 @@
 #include "Sphere.hpp"
 #include "Light.hpp"
 #include "SceneLoader.hpp"
+#include "Constants.hpp"
 
 using namespace std;
 using namespace math;
@@ -19,6 +20,8 @@ using namespace rayscene;
 
 int main(int argc, char* argv[])
 {
+    srand (static_cast <unsigned> (time(0)));
+
     const std::string sceneFile = (argc > 1) ? argv[1] : "../../../scene.json";
 
     SceneConfig sceneConfig = LoadSceneFromJson(sceneFile);
@@ -50,9 +53,9 @@ int main(int argc, char* argv[])
                              sphereCfg.specularPower);
     }
 
-    plane.DrawPlane(image, cam_origin, sceneConfig.width, sceneConfig.height, spheres, light);
+    plane.DrawPlane(image, cam_origin, sceneConfig.width, sceneConfig.height, spheres, light, sceneConfig.echantillonsNumber);
 
-    Sphere::DrawSphere(image, cam_origin, sceneConfig.width, sceneConfig.height, spheres, light, plane);
+    Sphere::DrawSphere(image, cam_origin, sceneConfig.width, sceneConfig.height, spheres, light, plane, sceneConfig.echantillonsNumber);
 
     image.WriteFile(sceneConfig.outputPath.c_str());
 

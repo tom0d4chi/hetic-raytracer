@@ -6,6 +6,7 @@
     },
     "output": "02_specular_showcase.png",
     "timer_label": "Rendering Specular Showcase",
+    "echantillonsNumber": 1,
     "camera": {
         "origin": [0, 0.8, -4],
         "look_at": [0, 0.5, 2],

@@ -10,6 +10,7 @@
     },
     "output": "braaaaaa.png",
     "timer_label": "Generation de l'image",
+    "echantillonsNumber": 16,
     "camera": {
         "origin": [
             0,

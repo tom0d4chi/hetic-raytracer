@@ -46,6 +46,7 @@ struct SceneConfig {
     std::optional<PlaneConfig> plane;
     std::optional<LightConfig> light;
     std::vector<SphereConfig> spheres;
+    int echantillonsNumber;
 };
 
 SceneConfig LoadSceneFromJson(const std::string& filepath);
